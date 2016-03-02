@@ -24,15 +24,30 @@ Sono composti da due entità:
 	\item \textbf{archi}: collegano i vari nodi. L'insieme E degli archi di un grafo è rappresentato dai nomi delle coppie di nodi che essi collegano. Possono essere unidirezionali o bidirezionali.
 \end{itemize}
 Si distinguono in \textit{grafi diretti} (con archi unidirezionali) e \textit{grafi indiretti} (con archi bidirezionali).
-\paragraph{Un pozzo.}
+\paragraph{Pozzo.}
 In un grafo diretto, si definisce \textit{pozzo} un nodo da cui non esce nessun arco.
-\paragraph{Un pozzo universale.}
+\paragraph{Pozzo universale.}
 In un grafo diretto, si definisce \textit{pozzo universale} un pozzo verso cui,direttamente o indirettamente, puntano tutti gli altri nodi.
+\paragraph{Esercizio.}
+Dato un grafo, trovare l'algoritmo che restituisce in $ O(n^2) $ \textit{vero} solo se è presente in esso un pozzo universale. \\\\
+Esistono due tipi di grafi:
+\begin{itemize}
+    \item \textbf{Grafi diretti}: i cui archi hanno una direzione. Possono rappresentare, quindi, sia grafi (mono)direzionali, che bidirezionali;
+    \item \textbf{Grafi indiretti}: i cui archi non hanno direzione. Possono rappresentare unicamente grafi bidirezionali.
+\end{itemize}
 
-\paragraph{Un esercizio intrigante.}
-Dato un grafo, trovare l'algoritmo che restituisce in $ O(n^2) $ \textit{vero} solo se è presente in esso un pozzo universale.
+\newpage
 
-\subsection{Grafi diretti}
-Sono bellissimi.
-\subsection{Rappresentazione tramite matrice}
-\subsection{Rappresentazione tramite lista di adiacenze}
+\subsection{Rappresentazioni}
+\subsubsection{Rappresentazione semplice (standard)}
+\begin{center}
+    \includegraphics[width=.4\textwidth]{rappresentazione-standard.jpg} \hfill
+\end{center}
+\subsubsection{Rappresentazione tramite matrice}
+\begin{center}
+    \includegraphics[width=.4\textwidth]{rappresentazione-matrice.jpg} \hfill
+\end{center}
+\subsubsection{Rappresentazione tramite lista di adiacenze}
+\begin{center}
+    \includegraphics[width=.4\textwidth]{rappresentazione-lista-adiacenze.jpg} \hfill
+\end{center}
