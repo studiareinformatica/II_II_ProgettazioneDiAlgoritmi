@@ -25,9 +25,59 @@ DFS(x)
         if vis[y]==0 then DFS(y)
 \end{lstlisting}
 
-Chiaramente, se al termina della visita, \textit{v} contiene ancora alcuni \textit{0}, significa che il grafo non è connesso. \\
+Chiaramente, se al termina della visita \textit{v} contiene ancora alcuni \textit{0}, significa che il grafo non è connesso. \\
 Genericamente la procedura \textit{DFS(x)} ha complessità di $O(n)$. Inoltre, però, questa fa un'iterazione (attraverso il ciclo \textit{for}) per ogni adiacenza col nodo, impiegando - nel caso peggiore - \textit{n} - caso in cui, quindi, il nodo abbia numero di adiacenze pari al numero totale di nodi. Di conseguenza, la procedura di visita impiega al più $O(n^2)$. \\
 Se questa procedura - invece di lavorare con un vettore - lavora sulla rappresentazione a matrice, il caso peggiore che abbiamo analizzato, diventa l'unico caso possibile, per cui $\theta(n^2)$. \\
 Infine, utilizzando la rappresentazione tramite liste di adiacenze, la procedura avrà complessità $O(n+m)$. \\\\
 Tramite il percorso seguito dalle chiamate \textit{DFS(x)} è inoltre possibile ricavarci un albero, la cui radice è proprio la sorgente da cui si è partiti nella visita del grafo. \\
 Inoltre, tramite lo stesso algoritmo - aggiungendo codice e/o funzioni - è possibile ottenere funzionalità particolari e aggiuntive, come la costruzione di un \textit{vettore dei padri}, un vettore che associa ad ogni nodo il corrispettivo padre nella rappresentazione dell'albero ottenuto tramite la visita del grafo.
+\newpage
+
+%...
+
+Mentre nella visita di un grafo indiretto gli archi dell'albero risultante sono bipartiti, in quella di un grafo diretto gli archi sono \textit{quadripartiti}:
+\begin{itemize}
+	\item \textit{arco albero}: arco standard di un albero
+	\item \textit{arco di attraversamento} o cross: arco laterale che va da destra a sinistra
+	\item \textit{arco in avanti}: da antenato a discendente
+	\item \textit{arco all'indietro} o back: da discendente ad antenato
+\end{itemize} 
+Per distinguere gli archi fwd/cross da back, si sottolinea la proprietà che i nodi che formano archi back non hanno finito la ricorsione in DFS.
+Per sottolineare questa differenza, si inserisce nella funzione DFS l'istruzione che associa ad un nodo - nel vettore V - il valore 2 una volta finita la ricorsione (fuori dal for loop).\\
+Per distinguere invece gli archi in avanti dai cross, occorre introdurre un nuovo vettore T che associ ogni nodo ad un valore numerico che ne indica l'ordine di visita: in questo modo sappiamo che i cross uniscono un nodo con un numero più grande (quindi visitato dopo) ad un nodo con un numero minore (viceversa per gli archi in avanti).
+
+\section{Esercizio}
+Numerare ogni tipo di arco dell'albero derivato dalla visita partita dal nodo \textit{u}.\\
+
+\begin{lstlisting}
+tree = 0
+back = 0
+forw = 0
+cros = 0
+time = 0
+V = [0|0|0|0|0|0|0|0|0|0|0|0|0|0|--]
+T = [0|0|0|0|0|0|0|0|0|0|0|0|0|0|--]
+
+DFS(x)
+	vis[x] = 1 
+	time++
+	T[x] = time
+	for y in adj(x)
+		albero++
+		if vis[y]==0
+			then DFS(y)
+		else
+			if vis[y] == 2
+				then back++
+			else if t[x] < t[y]
+				forw++
+			else
+				cross++
+	vis[x] = 2
+\end{lstlisting}
+
+\section{Connessioni forti}
+Si parla di \textit{grafo connesso} solo nel caso di grafi non diretti. Se il grafo è diretto occorre introdurre il concetto di \textbf{connessione forte}.\\
+In un grafo, una \textbf{componente connessa} è un insieme non aumentabile di nodi raggiungibili reciprocamente a coppie.\\
+Volendo definire un vettore che assegna ad ogni nodo un'etichetta diversa a seconda della sua componente, su un grafo non diretto questo vettore costa $ O(n) $ - il tempo di una visita via DFS.
+Su un grafo diretto, applicare l'algoritmo sopra definito sarebbe scorretto; la direzione degli archi causa anche nei grafi diretti più semplici un livello di complessità $ O(n^2) $.
