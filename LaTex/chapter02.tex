@@ -25,7 +25,7 @@ DFS(x)
         if vis[y]==0 then DFS(y)
 \end{lstlisting}
 
-Chiaramente, se al termina della visita \textit{v} contiene ancora alcuni \textit{0}, significa che il grafo non è connesso. \\
+Chiaramente, se al termine della visita \textit{v} contiene ancora alcuni \textit{0}, significa che il grafo non è connesso. \\
 Genericamente la procedura \textit{DFS(x)} ha complessità di $O(n)$. Inoltre, però, questa fa un'iterazione (attraverso il ciclo \textit{for}) per ogni adiacenza col nodo, impiegando - nel caso peggiore - \textit{n} - caso in cui, quindi, il nodo abbia numero di adiacenze pari al numero totale di nodi. Di conseguenza, la procedura di visita impiega al più $O(n^2)$. \\
 Se questa procedura - invece di lavorare con un vettore - lavora sulla rappresentazione a matrice, il caso peggiore che abbiamo analizzato, diventa l'unico caso possibile, per cui $\theta(n^2)$. \\
 Infine, utilizzando la rappresentazione tramite liste di adiacenze, la procedura avrà complessità $O(n+m)$. \\\\
@@ -33,7 +33,48 @@ Tramite il percorso seguito dalle chiamate \textit{DFS(x)} è inoltre possibile 
 Inoltre, tramite lo stesso algoritmo - aggiungendo codice e/o funzioni - è possibile ottenere funzionalità particolari e aggiuntive, come la costruzione di un \textit{vettore dei padri}, un vettore che associa ad ogni nodo il corrispettivo padre nella rappresentazione dell'albero ottenuto tramite la visita del grafo.
 \newpage
 
-%...
+\begin{algorithm}
+\caption{Verifica di presenza di un ciclo}\label{alg:VPC}
+\begin{algorithmic}[1]
+\Function{HasCicli}{$x$}\Comment{Verifica la presenza di un ciclo}
+\State $ {vis}(x) \gets 1$ \Comment{Flag di visita}
+\For { $y \in {adj}(x)$} \Comment{Lista di adiacenza di x}
+\If ${ (a)= {true} }$
+\Return true $(y)$ \Comment{Ricorsione per ricerca in profondità}
+\EndIf
+\EndFor
+\State \textbf{return} false\Comment{}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Secondo il professore l'algoritmo non è ottimizzato.
+Prendiamo il vettore dei padri: l'unica cosa che avremmo dovuto fare per tenerlo aggiornato sarebbe stata P[n] <- e poi chiamiamo cicli(u), con questa istruzione ogni nodo saprebbe chi è il padre.
+
+Analizziamo ora la complessità di questo algoritmo, e qui interviene il quesito secondo il quale ci chiediamo quale tipologia di implementazione del grafo dovremmo usare:
+Ipotizzando di avere le liste di adiacenza: $O(n+m)$, che è la partenza del DFS(u), e vale $O(n)$. Supponiamo che il grafo sia aciclico, allora io dico che si ferma in $O(n)$, se è aciclico è un albero (in cui n = m). Se invece fosse ciclico: appena lo trovo mi fermo. Certamente creo un ciclo perché per non avere cicli possono esserci al più $n-1$, quindi non visita tutto il grafo, ma dopo al più $n-1$ si ferma: questo significa che dato un grafo, vedere se nel grafo c'è un ciclo, si può fare in $O(n)$ indipendentemente dagli archi che ho nel grafo. Ad essere precisi, se la applico non posso dire se il grafico è aciclico o meno, perché se fosse sconnesso se mi restituisce true vuol dire che c'è un ciclo che è collegato alla zona da cui comincio. Ma se risponde false, essendo sconnesso, potrebbe esserci un ciclo all'interno di una parte separata di grafo. Quindi in realtà questo algoritmo funziona solo in un grafo connesso. Per visitare anche pezzi diversi del grafo devo fare sostanzialmente più visite. \\
+
+Se mi risponde false vado a scorrermi il vettore dei visitati, se tutto è stato visitato bene, ma se trovo un nodo che abbia valore 0 signfiica che si trova in una parte del grafo non raggiungibile, quindi vado a verificare quella parte del grafo, e se mi risponde false continuo a scorrere quello stesso vettore fino a quando il vettore è finito e tutti i nodi avranno valore 1. Non sto aumentando la complessità, perché mi costera $o(n(1))$, poi $o(n(2))$ + ... comunque sommati avrò in definitiva $O(n)$. Scritta in codice, la modifica risulta:
+
+
+\begin{algorithm}
+\caption{VPC grafo non connesso}\label{alg:VPCnC}
+\begin{algorithmic}[1]
+\Function{HasCicliDisconnectedGraph}{$x$}\Comment{Verifica la presenza di un ciclo}
+\State ${vis}(x) \gets 1$ \Comment{Flag di visita}
+\For {$ i= 1 \rightarrow n$} \Comment{}
+\If {$ {vis}(i)= 0 {} $} $c \gets {ciclo}(i) $
+\EndIf
+\If {$ {}(b)= {true} $}
+\Return true $(y)$ \Comment{}
+\EndIf
+\EndFor
+\State \textbf{return} false\Comment{}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
 
 Mentre nella visita di un grafo indiretto gli archi dell'albero risultante sono bipartiti, in quella di un grafo diretto gli archi sono \textit{quadripartiti}:
 \begin{itemize}
