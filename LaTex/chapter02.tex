@@ -55,7 +55,7 @@ Prendiamo il vettore dei padri: l'unica cosa che avremmo dovuto fare per tenerlo
 Analizziamo ora la complessità di questo algoritmo, e qui interviene il quesito secondo il quale ci chiediamo quale tipologia di implementazione del grafo dovremmo usare:
 Ipotizzando di avere le liste di adiacenza: $O(n+m)$, che è la partenza del DFS(u), e vale $O(n)$. Supponiamo che il grafo sia aciclico, allora io dico che si ferma in $O(n)$, se è aciclico è un albero (in cui n = m). Se invece fosse ciclico: appena lo trovo mi fermo. Certamente creo un ciclo perché per non avere cicli possono esserci al più $n-1$, quindi non visita tutto il grafo, ma dopo al più $n-1$ si ferma: questo significa che dato un grafo, vedere se nel grafo c'è un ciclo, si può fare in $O(n)$ indipendentemente dagli archi che ho nel grafo. Ad essere precisi, se la applico non posso dire se il grafico è aciclico o meno, perché se fosse sconnesso se mi restituisce true vuol dire che c'è un ciclo che è collegato alla zona da cui comincio. Ma se risponde false, essendo sconnesso, potrebbe esserci un ciclo all'interno di una parte separata di grafo. Quindi in realtà questo algoritmo funziona solo in un grafo connesso. Per visitare anche pezzi diversi del grafo devo fare sostanzialmente più visite. \\
 
-Se mi risponde false vado a scorrermi il vettore dei visitati, se tutto è stato visitato bene, ma se trovo un nodo che abbia valore 0 signfiica che si trova in una parte del grafo non raggiungibile, quindi vado a verificare quella parte del grafo, e se mi risponde false continuo a scorrere quello stesso vettore fino a quando il vettore è finito e tutti i nodi avranno valore 1. Non sto aumentando la complessità, perché mi costera $o(n(1))$, poi $o(n(2))$ + ... comunque sommati avrò in definitiva $O(n)$. Scritta in codice, la modifica risulta:
+Se mi risponde false vado a scorrermi il vettore dei visitati, se tutto è stato visitato bene, ma se trovo un nodo che abbia valore 0 signfiica che si trova in una parte del grafo non raggiungibile, quindi vado a verificare quella parte del grafo, e se mi risponde false continuo a scorrere quello stesso vettore fino a quando il vettore è finito e tutti i nodi avranno valore 1. Non sto aumentando la complessità, perché mi costera $o(n(1))$, poi $o(n(2))$ + \ldots comunque sommati avrò in definitiva $O(n)$. Scritta in codice, la modifica risulta:
 
 \begin{algorithm}
     \caption{VPC grafo non connesso}\label{alg:VPCnC}
@@ -252,3 +252,46 @@ Si parla di \textit{grafo connesso} solo nel caso di grafi non diretti. Se il gr
 In un grafo, una \textbf{componente connessa} è un insieme non aumentabile di nodi raggiungibili reciprocamente a coppie. \\
 Volendo definire un vettore che assegna ad ogni nodo un'etichetta diversa a seconda della sua componente, su un grafo non diretto questo vettore costa $ O(n) $ - il tempo di una visita via DFS.
 Su un grafo diretto, applicare l'algoritmo sopra definito sarebbe scorretto; la direzione degli archi causa anche nei grafi diretti più semplici un livello di complessità $ O(n^2) $.
+
+
+\subsection{Componenti fortemente connesse}
+Il concetto di \textit{componenti fortemente connesse} - come accennato, relativo solo ai \textit{grafi diretti} - è decisamente divserso da quello delle \textit{componenti connesse} - relativo, invece, soltanto ai \textit{grafi indiretti}. \\
+Si sa che per conoscere le componenti connesse, dato un grafo indiretto, occorre $ O(m+n)$. \\
+Dato un grafo diretto, invece, occorre definire alcuni dati aggiuntivi:
+\begin{itemize}
+    \item Insieme \textit{A}: l'insieme dei nodi raggiungibili da \textit{u}, che \textit{contiene} la componente fortemente connessa (per conoscerlo, il costo è pari a quello di una visita in profondità tradizionale: $O(m+n)$);
+    \item Grafo trasposto $G^T$\footnote{Dato un grafo diretto, che connette direttamente un nodo \textit{a} ad un nodo \textit{b}, si dice \textit{grafo trasposto} quello che contiene gli stessi nodi del grafo sul quale è applicata la trasposizione e i cui archi hanno inversione inversa: legherà il nodo \textit{b} al nodo \textit{a}.}: ancora, la costruzione del grafo trasposto, avrà costo pari alla visita del grafo stesso: $O(m+n)$;
+    \item Insieme \textit{B}: l'insieme dei nodi che raggiungono \textit{u}, il cui costo è - ancora una volta - pari a quello di una visita \textit{del grafo trasposto}: $O(m+n)$.
+\end{itemize}
+Date queste informazioni, sappiamo che individuare la componente connessa relativa ad un nodo \textit{u} significherà applicare l'insersezione dei due insiemi \textit{A} e \textit{B}: $A\cap B$.
+In definitiva, il costo totale sarà pari a: \\
+\begin{center}
+    $ O(m+n) + O(m+n) + O(m+n) = 3\times O(m+n) = O(m+n) $
+\end{center}
+\paragraph{NB:}
+L'ultima uguaglianza è accettabile soltanto perché è nostro interesse definire l'andamento asintotico associato alla funzione. \\
+\textit{A} e \textit{B} sono - come al solito - considerati dei vettori, i quali contengono \textit{1} in corrispondenza dei nodi visitati, \textit{0} altrimenti; il vettore risultante sarà \textit{CFC}, vettore contenente i risultati in \textit{AND logico} dei nodi corrispondenti in \textit{A} e \textit{B}, perché, come già detto: $ CDC = A\cap B $. \\
+Dunque un grafo diretto è fortemente connesso se \textit{CFC} contiene solo \textit{1}. \\
+\newpage
+Per individuare tutte le componenti connesse del grafo, teoricamente, dovrei riapplicare questa procedura su tutti i nodi del grafo: $ O(n)O(m+n) $.
+Per questa ragione, è stato elaborato l'algoritmo di \textit{Tarjan}. \\
+Il seguente schema esplicita un esempio di applicazione dell'algoritmo:
+\begin{center}
+    \includegraphics[width=.9\textwidth]{res/tarjan-grafo-albero.jpg} \hfill
+\end{center}
+Nell'albero risultante della visita, le componenti fortemente connesse rappresentano dei sottoalberi, dei \textit{grappoli}. \\
+Occorre a questo punto definire il concetto di \textit{c-radice} (o \textit{c-root}): nodo che stabilisce la nascita di un sottoalbero che è componente fortemente connessa (nell'esempio proposto sopra, sono \textit{c-radici}: \textit{1}, \textit{7}, \textit{6} e \textit{8}).
+Un nodo scopre di essere \textit{c-radice} durante la risalita dalla ricorsione nella visita del grafo. \\
+Quindi, nell'algoritmo di \textit{Tarjan}, ogni nodo visitato a partire dalla radice, viene inserito in uno \textit{stack}; quando ritorno - per ricorsione - alla radice stessa, svuoto tutto lo \textit{stack}, che contiene i nodi che ormai sappiamo essere parte di una componente fortemente connessa. \\
+Il costo totale è pari a quello della visita sommato all'analisi dello \textit{stack} (che - per deduzione -  sappiamo essere pari a $ O(n) $): $ O(m+n)O(n) $. \\
+Inoltre, sicuramente, in un sottoalbero, un nodo non può essere \textit{c-radice} se un suo antenato è raggiunto da un arco \textit{back}. Ancora, l'arco \textit{cross} suggerisce un nuovo \textit{c-root} soltanto se punta ad un nodo che è già nello \textit{stack} attualmente in lavorazione.
+
+\section{Grafo pesato}
+Si definisce \textit{grafo pesato} un grafo i cui archi hanno un \textit{peso}, detto \textit{valore} o \textit{costo}. \\
+Nella rappresentazione a \textit{matrice}, un \textit{grafo pesato} sarà rappresentabile sostituendo gli \textit{1}, con i \textit{pesi} degli archi. Analogamente, nella rappresentazione tramite \textit{liste di adiacenza}, si utilizzeranno non più caselle da due - contenenti il nodo e il collegamento ad un altro nodo -, ma caselle da tre - contenenti anche il \textit{peso} degli archi che legano il nodo precedente a quello descritto nella casella. \\
+Avendo un grafo pesato, sappiamo che il \textit{valore} degli archi indica una distanza: voglio calcolare, a partire da un nodo \textit{u}, tutte le distanze \textit{minime} dal nodo \textit{u} a tutti quelli che sono legati (anche indirettamente) a questo stesso, costruendo un \textit{albero dei cammini}. Il seguente problema è stato risolto con l'algoritmo di \textit{Dijkstra}. \\
+\newpage
+Sostanzialmente, si parte dal nodo \textit{u}, indicandone - ad apice - la distanza (la distanza di \textit{u} da sé stesso è pari a \textit{0}). La regola \textit{greedy}\footnote{Con \textit{greedy} si intende una tecnica algoritmica che cerca di ottenere una soluzione ottima da un punto di vista globale attraverso la scelta della soluzione più \textit{golosa} (\textit{aggressiva} o \textit{avida}) ad ogni passo locale.} consiste nello scegliere, a partire da quest'ultimo, \textit{sempre} il nodo raggiungibile (direttamente - tramite \textit{u} stesso - o indirettamente - tramite i nodi adiacenti ai nodi già aggiunti all'albero -) con distanza minima.
+\begin{center}
+    \includegraphics[width=.9\textwidth]{res/dijkstra-albero-cammini-minimi.jpg} \hfill
+\end{center}
