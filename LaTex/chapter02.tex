@@ -291,7 +291,56 @@ Si definisce \textit{grafo pesato} un grafo i cui archi hanno un \textit{peso}, 
 Nella rappresentazione a \textit{matrice}, un \textit{grafo pesato} sarà rappresentabile sostituendo gli \textit{1}, con i \textit{pesi} degli archi. Analogamente, nella rappresentazione tramite \textit{liste di adiacenza}, si utilizzeranno non più caselle da due - contenenti il nodo e il collegamento ad un altro nodo -, ma caselle da tre - contenenti anche il \textit{peso} degli archi che legano il nodo precedente a quello descritto nella casella. \\
 Avendo un grafo pesato, sappiamo che il \textit{valore} degli archi indica una distanza: voglio calcolare, a partire da un nodo \textit{u}, tutte le distanze \textit{minime} dal nodo \textit{u} a tutti quelli che sono legati (anche indirettamente) a questo stesso, costruendo un \textit{albero dei cammini}. Il seguente problema è stato risolto con l'algoritmo di \textit{Dijkstra}. \\
 \newpage
-Sostanzialmente, si parte dal nodo \textit{u}, indicandone - ad apice - la distanza (la distanza di \textit{u} da sé stesso è pari a \textit{0}). La regola \textit{greedy}\footnote{Con \textit{greedy} si intende una tecnica algoritmica che cerca di ottenere una soluzione ottima da un punto di vista globale attraverso la scelta della soluzione più \textit{golosa} (\textit{aggressiva} o \textit{avida}) ad ogni passo locale.} consiste nello scegliere, a partire da quest'ultimo, \textit{sempre} il nodo raggiungibile (direttamente - tramite \textit{u} stesso - o indirettamente - tramite i nodi adiacenti ai nodi già aggiunti all'albero -) con distanza minima.
+Sostanzialmente, si parte dal nodo \textit{u}, indicandone - ad apice - la distanza (la distanza di \textit{u} da sé stesso è pari a \textit{0}). La regola \textit{greedy}\footnote{Con \textit{greedy} si intende una tecnica algoritmica che cerca di ottenere una soluzione ottima da un punto di vista globale attraverso la scelta della soluzione più \textit{golosa} (\textit{aggressiva} o \textit{avida}) ad ogni passo locale. Nel regno degli algoritmi \textit{greedy}, esistono gli algoritmi \textit{approssimato}: risolvono problemi con complessità esponenziale, attraverso soluzioni più approssimative rispetto a quelle assolutamene provabili.} consiste nello scegliere, a partire da quest'ultimo, \textit{sempre} il nodo raggiungibile (direttamente - tramite \textit{u} stesso - o indirettamente - tramite i nodi adiacenti ai nodi già aggiunti all'albero -) con distanza minima.
 \begin{center}
     \includegraphics[width=.9\textwidth]{res/dijkstra-albero-cammini-minimi.jpg} \hfill
 \end{center}
+La complessità dell'algoritmo di \textit{Dijkstra} è pari a $O((m+n)\times logn)$.
+
+
+\section{Implementazione dell'algoritmo}
+\begin{algorithm}
+    \caption{Ricerca di albero dei cammini minimi}\label{alg:ACM}
+    \begin{algorithmic}[1]
+        \Function{camminiMinimi}{}
+            \State $P(u) \gets u$  \Comment{Flag di visita}
+            \For { $ i \in 2 \to n $}
+                \State find Arch(x,y) such that \{
+                \State (P(x) != 0 && P(y) = 0) such that \Comment{P: parent}
+                \State (D(x) + c(x,y)) is lower value \Comment{D: distance; c: cost}
+                \State \}
+                \State P(y) = x
+                \State D(y) = D(x) + c(x,y)
+            \EndFor
+            \State \textbf{return} false\Comment{}
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\subsection{Dimostrazione correttezza dell'algoritmo}
+Dobbiamo dimostrare che, ad ogni passo, la distanza settata è effettivamente la distanza minima dalla radice.
+\begin{itemize}
+    \item \textbf{CASO BASE: $ D[u] = 0 $}
+        Corretto solo se nel grafo non ci sono archi con peso negativo;
+    \item \textbf{PASSO INDUTTIVO: la distanza $D[i]$ è corretta, occorre verificare che lo sia anche per $D[i+1]$}
+        Supponiamo che valga fino al passo i-esimo (quindi che le distanze fino a quel passo siano valide). Avremo un insieme di nodi ancora non inseriti nel nuovo albero; per ogni nodo di questo insieme ci sarà almeno un nodo collegato ad esso e già inserito nell'albero. Supponiamo che ci sia un cammino alternativo rispetto a quello 'corretto'. Ciò è assurdo: se scelgo il cammino da \textit{a} a \textit{b}, so che sicuramente costerà più di quello $D[u]$ e che \textit{b} non potrà fare altro che peggiorare la situazione, dovendo passare \textit{x} altri nodi prima di raggiungere \textit{y} (senza pesi negativi).
+\end{itemize}
+
+\subsection{Complessità dell'algoritmo}
+Banalmente, si potrebbe dire che:
+\begin{itemize}
+    \item a causa del ciclo \textit{for}, avremo sicuramente una complessità di $O(n)$;
+    \item a causa delle operazioni interne al ciclo \textit{for}, invece, di $O(n+m)$ (dove \textit{n} è il numero di operazioni eseguite dalla ricerca dell'arco, e \textit{m} per le altre).
+\end{itemize}
+Seguendo questo ragionamento, la complessità sarebbe pari a:
+\begin{center}
+    $ O(n)\times O(n+m) = O(n^2 + n\times m) $
+\end{center}
+Analizzando però con più precisione, consideriamo che per ogni iterazione nel ciclo \textit{for}, le verifiche da eseguire diminuiscono, perché i nodi già inseriti nei vettori, non vanno più considerati. Inoltre, poiché per trovare il minimo in un \textit{heap} occorre $\log(n)$, arriviamo a ridurre la complessità complessiva, fino a raggiungere: $O((m+n)\times \log(n))$ .
+
+\section{Trasformazione da grafi pesati a standard}
+Trasformare grafi pesati in grafi standard può risultare utile in alcuni casi, ma in linea di massima presenta alcune complicazioni nell'analisi del grafo costruito:
+\begin{itemize}
+    \item il numero i nodi aumenta del peso totale degli archi nel grafo originario, al quale viene sottratto il numero di archi stesso;
+    \item il numero di archi diventerà pari alla somma dei pesi di tutti gli archi del grafo originario.
+\end{itemize}
