@@ -297,8 +297,7 @@ Sostanzialmente, si parte dal nodo \textit{u}, indicandone - ad apice - la dista
 \end{center}
 La complessità dell'algoritmo di \textit{Dijkstra} è pari a $O((m+n)\times logn)$.
 
-
-\section{Implementazione dell'algoritmo}
+\subsection{Implementazione dell'algoritmo}
 \begin{algorithm}
     \caption{Ricerca di albero dei cammini minimi}\label{alg:ACM}
     \begin{algorithmic}[1]
@@ -306,7 +305,7 @@ La complessità dell'algoritmo di \textit{Dijkstra} è pari a $O((m+n)\times log
             \State $P(u) \gets u$  \Comment{Flag di visita}
             \For { $ i \in 2 \to n $}
                 \State find Arch(x,y) such that \{
-                \State (P(x) != 0 && P(y) = 0) such that \Comment{P: parent}
+                \State (P(x) != 0 \&\& P(y) = 0) such that \Comment{P: parent}
                 \State (D(x) + c(x,y)) is lower value \Comment{D: distance; c: cost}
                 \State \}
                 \State P(y) = x
@@ -344,3 +343,68 @@ Trasformare grafi pesati in grafi standard può risultare utile in alcuni casi, 
     \item il numero i nodi aumenta del peso totale degli archi nel grafo originario, al quale viene sottratto il numero di archi stesso;
     \item il numero di archi diventerà pari alla somma dei pesi di tutti gli archi del grafo originario.
 \end{itemize}
+\newpage
+
+\section{Albero di copertura}
+L'introduzione dell'\textit{albero di copertura} deriva dalla necessità di ridurre un grafo mantenendolo connesso e con archi di costo minimo. Sostanzialmente, mentre con \textit{Dijkstra} si teneva conto dei percorsi attraversati per avere una visione oggettiva del percorso più corto selezionabile, nell'individuazione dell'arco utile alla costruzione di un albero di copertura, si seleziona \textit{sempre} l'arco con costo minore rispetto al nodo preso in considerazione nell'attraversamento del grafo.
+Con l'algoritmo di \textit{Dijkstra} otteniamo un albero che connette tutto il grafo ma \textit{non} è l'albero di copertura minimo. \\
+
+Può accadere che un albero di copertura coincida con l'albero dei cammini minimi (derivante dall'applicazione dell'algoritmo di \textit{Dijkstra}): \\
+\begin{center}
+	\includegraphics[width=.75\textwidth]{res/copertura-caso1.jpg} \hfill
+\end{center}
+
+Ma non è possibile assolutizzare, perché in alcuni casi questo non accade: \\
+\begin{center}
+	\includegraphics[width=.75\textwidth]{res/copertura-caso2.jpg} \hfill
+\end{center}
+
+Quindi, con l'algoritmo di \textit{Dijkstra} non possiamo determinare l'albero di copertura minimo. Per individuarlo, occorre utilizzare un algoritmo \textit{greedy} simile a quello di \textit{Dijkstra} ma cambiando la regola di selezione degli archi ad ogni passo. Ignorando il costo degli archi precedenti, ad ogni passo scegliamo l'arco di costo minore dal nodo in cui ci si trova al nodo che si vuole connettere.
+
+\subsection{Analisi e costi}
+Al momento, si sa che vi sono diversi costi di visita in base al tipo di struttura adoperato:
+\begin{itemize}
+	\item $O(n\times m)$ : tramite liste di adiacenza;
+	\item $O(n^2)$ : tramite vettore;
+	\item $O((n+m)\times \log(n))$ : tramite \textit{heap};
+	\item $O(m+n\times \log(n))$ : tramite \textit{heap} di \textit{Fibonacci}.
+\end{itemize}
+Uno stesso grafo può avere più alberi di costo minimo differenti.
+
+\subsubsection{Dimostrazione validità}
+Si vuole dimostrare che se un grafo è connesso abbiamo almeno un albero di copertura.
+Chiamiamo $T_{o\ldots n}$ gli archi presenti nell'albero parziale nato dalla visita fino al passo \textit{n}, e dimostriamo :
+\begin{center}
+	$\forall i : T_{i} \subseteq T^*$ \\
+	dove $T^*$ è l'albero di copertura ottimale
+\end{center}
+\paragraph{Passo base}
+$T_{0} = \phi \Rightarrow T_{0} \subseteq T^* \Rightarrow$ il passo base è verificato.
+\paragraph{Passo induttivo}
+$T_{i} \subseteq T^*$ per ipotesti induttiva. Ma per $T_{i+1}$? \\
+Sicuramente sappiamo che $T_{i+1} = T_{i} \cup \{e\}$, dove \textit{e} è l'arco di costo minimo a partire nal nodo attualmente selezionato. Ma $T_{i} \cup \{e\} \subseteq T^*$? Possono accadere due casi: o \textit{e} è presente, o non lo è. \\
+Se \textit{e} è presente in $T^*$ abbiamo dimostrato la correttezza dell'ipotesi. Se invece non lo è, allora $T^*$ non è la soluzione ottimale che cerchiamo, ma potrebbe esistere un'altra soluzione ottimale che contiene anche \textit{e}. \\
+Quindi, $T_{i+1} \cup \{e\} \subseteq T^* \cup \{e\} - \{e^1\}$: per mantenere il contenimento vero, bisogna togliere un arco $e^1$ che non è contenuto in $T^*$.
+Questo ragionamento nasconde il fatto che il grafo nasconde archi diversi con pari costo, motivo per cui siamo abilitati a non dare eccessiva importanza alla rimozione dell'arco $e^1$.
+
+\subsection{Algoritmo di Kruskal}
+Tramite l'algoritmo di \textit{Kruskal}, si individua un albero di copertura attraverso un sistema diverso. Partendo da un grafo, si selezionano sequenzialmente tutti gli archi - da quello con costo minimo a quello con costo massimo: se l'arco stabilisce un ciclo con gli archi precedentemente selezionati, viene scartato, altrimenti preso. \\
+Tale algoritmo ha costo $O(m\times \log(m))$ (asintoticamente pari a $O(m\times \log(n))$; quantitativamente parlando, invece, $(m\times \log(m)) \geq (m\times \log(n))$).
+
+\begin{algorithm}
+	\caption{Ricerca di albero di copertura}\label{alg:AC}
+	\begin{algorithmic}[1]
+		\Function{alberoCopertura}{}
+		\State $T \gets \phi$  \Comment{Inizializzazione albero}
+		\While {$ |E| \neq \phi $}
+		\State estrai arco \textit{e} di costo minimo da \textit{E}
+		\If {\textit{e} non forma ciclo con \textit{T}}
+			\State $T \gets T \cup \{e\}$
+		\EndIf
+		\EndWhile
+		\State \textbf{return} \textit{T}
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+Estrarre l'arco di costo minimo costa $O(n)$ se non ottimizzo e uso una lista. Se invece ordiniamo per estrarre il minimo dalla testa, paghiamo $O(1)$. Per ordinare spendiamo - una sola volta - $O(m\times \log(m))$. Controllare se l'arco stabilisce un ciclo con gli archi già visitati significa visitare \textit{T} in $O(n)$. Il \textit{while} costa, invece, $O(m)$.
