@@ -407,4 +407,48 @@ Tale algoritmo ha costo $O(m\times \log(m))$ (asintoticamente pari a $O(m\times 
 	\end{algorithmic}
 \end{algorithm}
 
-Estrarre l'arco di costo minimo costa $O(n)$ se non ottimizzo e uso una lista. Se invece ordiniamo per estrarre il minimo dalla testa, paghiamo $O(1)$. Per ordinare spendiamo - una sola volta - $O(m\times \log(m))$. Controllare se l'arco stabilisce un ciclo con gli archi già visitati significa visitare \textit{T} in $O(n)$. Il \textit{while} costa, invece, $O(m)$.
+Estrarre l'arco di costo minimo costa $O(n)$ se non ottimizzo e uso una lista. Se invece ordiniamo per estrarre il minimo dalla testa, paghiamo $O(1)$. Per ordinare spendiamo - una sola volta - $O(m\times \log(m))$. Controllare se l'arco stabilisce un ciclo con gli archi già visitati significa visitare \textit{T} in $O(n)$. Il \textit{while} costa, invece, $O(m)$. \\
+Dunque il \textit{while} viene eseguito esattamente \textit{n} volte, ovvero il numero degli archi, e non si può far niente per migliorarlo. L'\textit{if}, senza ottimizzazioni impiega $O(m\times n)$. \\
+Vogliamo fare in modo di trasformarlo in $\log(n)$: l'idea è quella di usare una struttura dati, \textit{onion n file}. Non voglio arrivare al migliore modo di implementare questa struttura, ma l'obiettivo è quello di raggiungere $m \log(n)$ (meno non avrebbe granché senso asintoticamente parlando, a causa del costo dell'ordinamento, che appunto è questo). \\
+Dato un \textit{heap} vogliamo sapere se un arco crea un ciclo in un albero. Questa operazione sarebbe fatta in modo efficiente se c'è un coefficiente per scoprire, dati due componenti,m se sono nella stessa componente connessa. Se è così, non dovrò aggiungerlo, sì, altrimenti. Sostanzialmente, occorre una struttura dati, per \textit{strutturare i dati} (i nodi, nello specifico), in modo tale da poter in modo efficiente rispondere alla domanda: \textit{due nodi sono nella stessa componente?} In più deve essere facilmente aggiornabile, perché si vuole che si fondano due componenti - precedentemente sconnesse - in una connessa. \\
+Avrò quindi bisogno di due operazioni:
+\begin{itemize}
+	\item un metodo \textit{find(x)} che, dato un nodo \textit{x}, mi restituisca la componente di quel nodo;
+	\item un metodo \textit{union(a,b)} che, date due componenti \textit{a} e \textit{b}, le unisca.
+\end{itemize}
+
+\begin{algorithm}
+	\caption{Ricerca di albero di copertura con \textit{find} e \textit{union}}\label{alg:AC2}
+	\begin{algorithmic}[1]
+		\Function{alberoCopertura}{}
+			\State $T \gets \phi$  \Comment{Inizializzazione albero}
+			\State ordina \textit{E} in maniera crescente
+			\While {$ |E| \neq \phi $}
+				\State estrai arco \textit{e} di costo minimo da \textit{E}
+				\State $a \gets find(x)$
+				\State $b \gets find(y)$
+				\If { $a \neq b$}
+					\State $T \gets T \cup \{e\}$
+					\State $union(a,b)$
+				\EndIf
+			\EndWhile
+			\State \textbf{return} \textit{T}
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+Inizialmente, ogni volta che viene eseguita la \textit{union(a,b)} diminuirà di 1 il numero di componenti connesse, per cui l'algoritmo verrà eseguito \textit{n} volte e il costo dell'altra parte sarà di $n\times O(union)$. Questo sarebbe il costo dell'algoritmo, perché all'inizio $O(m \times \log(n))$, poi $m\times O(find)$ e $n\times O(union)$. \\
+Con questa implementazione \textit{find} costerà $O(1)$ e \textit{union} $O(n)$, aumenterà perché la \textit{union} costerà totalmente $O(n^2)$. A noi serve un'implementazione più avanzata, perché questa fa molto bene il \textit{find}, ma non l'\textit{union}. \\
+A noi occorre che le \textit{union} siano eseguite in maniera efficiente e che le \textit{find} costino $O(\log(n))$, in modo che le \textit{union} impieghino \textit{n}. \\
+Il modo migliore è pensare una regola per cui la \textit{union} che unisce due componenti con nome diversono, nella risultante mantengono quello della più piccola: $min(a,b) = a$. In questo modo, la componente \textit{b} prenderà nome \textit{a}. Sembra che così costi $O(1)$: vado nel vettore, e quando devo unire le due componenti vado a vedere in \textit{a} cosa c'è, poi in \textit{b}, prendo il più piccolo e lo metto nel massimo. \\
+Dopo aver cambiato 10 nodi, dovrò unirla con una componente che ha nome più piccolo, non solo deve cambiare il nome di quell'elemento, ma anche di tutti i 10 nodi con cui questo era connesso. Occorre quindi scorrere tutto il vettore ed ogni volta che si incontra il vecchio nome, sostituirlo con il nuovo: funziona ed ha costo $O(n)$.
+
+\subsubsection{Metodo più efficiente}
+Costruisco un \textit{tabloid}: ho una lista a puntatori, ognuno punta a sé stesso. Nel momento in cui inserisco nel grafo un arco \textit{(a,b)}, queste due liste a puntatori \textit{a} e \textit{b} le unisco in una lista unica: quale delle due? Non è granché importante, possiamo utilizzare il meccanismo del rapporto \textit{padre-figlio} tra i nodi. Ma in questo caso non posso farlo più in $O(1)$, perché devo salire dalle varie componenti, per scoprire se la componente in cui si trova un determinato tramite il vettore dei padri mi muovo all'interno della lista finché non arrivo alla radice. La radice sarà quella che dà il nome alla componente. Ad esempio, \textit{a} punta a sé stesso, e \textit{b} punterà a \textit{a}, perciò \textit{b} sarà in \textit{a}. \\
+Quando devà fare la \textit{union} trasformo semplicemente gli indici, faccio un \textit{find} sul primo e secondo elemento, poi quello che faccio è che la componente più grande diventa figlia di quella più piccola: ad esempio, se unisco $a=(2,3)$ e $b=(4,5)$, accade che l'unica cosa che dovrò fare è far puntare 4 a 2. \\
+Questo vuol dire che dopo che ho fatto le due \textit{find}, la \textit{union} richiede soltanto di cambiare il nome ad una delle due, di farla puntare a quella più piccola. Questa operazione costerà soltanto $O(1)$. La \textit{find}, dato un nodo, per scoprire la componente, richiede che io risalga fino a raggiungere la radice, un nodo in cui il padre è sé stesso. Costa $O(n)$, ma noi volevamo costasse $O(\log(n))$. Ma con questo meccanismo gli albero possono diventare molto lunghi, perché per ogni componente unita creo un nuovo \textit{alberello} a sé stante. Quello che occorre fare è scegliere di far puntare quello più piccolo a quello più grande: usando questa tecnica, l'albero risultante rimarrà bilanciato. \\
+Vogliamo dimostrare che usando questo artificio, quello che ha l'altezza minore diventa padre e quello con altezza maggiore diventa figlio e allora le catene non potranno essere più lunghe di $\log(n)$.
+\paragraph{Dimostrazione}
+Dimostriamo che un albero di altezza \textit{i} avrà al massimo $2^i$ nodi. \\
+Poiché in un albero al pià che ne possono essere \textit{n}, quindi $2^i \le n$. Allora $i \le \log(n)$. Di conseguenza, qualsiasi altezza non potrà superare $\log(n)$. \\
+Se l'altezza è pari a 0 - non avendo fatto \textit{union}, allora avremo $2^0$ nodi, quindi è vero. Vale lo stesso anche con una \textit{union} in più. Con una \textit{union} in più, un albero che aveva una certa altezza può aumentare, ma poiché il più piccolo lo rendo figlio se il più piccolo non aveva altezza \textit{i}, cambia l'altezza del nuovo albero solo quando i due alberi hanno la stessa altezza: uno dei due aumenta di uno. L'altezza quindi diventerà $i+1$, ma per ipotesi induttiva, poiché aveva altezza \textit{i}, aveva almeno $2^i$ nodi, e la somma di questo è almeno $2^i + 2^i = 2^(i+1)$. Il meno profondo deve diventare figlio del più profondo, ed intuitivamente questo significa che le altezze non crescono, ameno che siano uguali in cui aumenterà semplicemente di \textit{1} l'altezza. \\
+Usiamo quindi il vettore dei padri ed ogni volta che devi unire, questa volta avrai una foresta (tanti alberi diversi) e quando vuoi conoscere la componente risali a quel nodo e raggiungi la radice (quella è la componente). Questa risalita non costerà mai più di $\log(n)$. Cambiare il puntatore costerà solo $O(1)$.
