@@ -1,0 +1,48 @@
+Si definiscono \textit{algoritmi approssimanti} quelli che cercano soluzioni ammissibili: non si impongono di trovare le soluzioni ottimali e precise a problemi specifici, ma aggirano il problema elaborando soluzioni semplificate e quantomeno ammissibili.
+
+\paragraph{Euristica}
+Qualcosa che risolve problemi \textit{come meglio può}, per cui non è esattamente dimostrabile la correttezza.
+
+\section{Vertex-cover}
+Partiamo da un grafo a \textit{n} nodi: il problema del \textit{vertex-cover} vuole selezionare il numero minimo di nodi tale che tutti gli archi del grafo coprano almeno uno di questi nodi.
+Si tratta di un problema di minimizzazione: ovviamente prendendo tutti i nodi, copriremo anche tutti gli archi che coprono due volti alcuni nodi. \\
+La soluzione ottima, di conseguenza, costa $O(1)$, mentre la peggiore $O(n)$.
+Ho un'euristica, se questo algoritmo non sbaglia, allora il \textit{rapporto d'approssimazione}:
+\begin{center}
+	$\frac{c(soluzione trovata)}{c(soluzione ottima)} \geq \frac{n}{1}$
+\end{center}
+sarà pari ad 1. Più l'algoritmo si allontana da una situazione ottimale, più sarà lontano (minore) da 1. \\
+L'obiettivo è trovare un valore di euristica che sia sempre $\leq 2$ (si è dimostrato che sotto 2 non si possa andare).
+
+\paragraph{NB}
+Molto spesso algoritmi \textit{greedy} vanno incontro ai fini dell'euristica, sebbene non risultano essere sempre \textit{ottimi}. \\ \\
+
+L'idea tramite algoritmo \textit{greedy} è quello di cercare il nodo che sia collegato al numero maggiore di archi, escluderlo, insieme con tutti gli archi a cui era legato. Ripetendo questa procedura fino a quando non avremo più archi, tutti i nodi esclusi fino a quel momento faranno parte dell'insieme \textit{vertex-cover}. \\
+Occorre quindi ora provare la validità di questo algoritmo.
+Prendendo una catena di 5 nodi, sappiamo che la soluzione ottima è di $O(2)$, prendendo il secondo e il quarto nodo. Il nostro algoritmo - se partirà dal terzo nodo -, si ritroverà a dover analizzare ancora almeno altri 2 nodi: avrà costo pari a $O(3)$. Per questo l'euristica avrà \textit{rapporto d'approssimazione} pari (circa) a \textit{1,5}, perché:
+\begin{center}
+	$\frac{c(soluzione trovata)}{c(soluzione ottima)} = \frac{O(3)}{O(2)} = 1,5$
+\end{center}
+Detto ciò, però, utilizzando altri esempi possiamo arrivare a soluzioni che abbiano \textit{rapporto d'approssimazione} decisamente maggiore di 2. \\
+\begin{algorithm}
+	\caption{Algoritmo approssimamente vero per vertex-cover}\label{alg:VC1}
+	\begin{algorithmic}[1]
+		\Function{algo}{}
+		\State $Sol \gets \phi$  \Comment{Inizializzazione insieme nodi}
+		\While {$ E \neq \phi $}
+		\State estrai arco \textit{\{x,y\}} da \textit{E}
+		\If { $x \notin Sol$ and $y \notin Sol$}
+		\State $Sol \gets Sol \cup \{x,y\}$
+		\EndIf
+		\EndWhile
+		\State \textbf{return} \textit{Sol}
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+
+Questo algoritmo ha complessità $O(m)$. Inoltre, è certamente ammissibile, perché: supponiamo che per assurdo non lo faccia; c'è un arco per cui non è stato preso né un estremo né l'altro. Ci sarà stato un momento, tramite il \textit{while} in cui è stato analizzato l'arco \textit{\{a,b\}}: ma proprio per come è stato scritto l'\textit{if}, sicuramente o in un altro momento era già stato preso uno dei due estremi, o altrimenti - se così non fosse stato - l'\textit{if} avrebbe portato a prendere entrambi. \\
+D'altronde, l'algoritmo non è perfetto perché per ogni arco preso in considerazione, inserisce nell'insieme entrambi i nodi, quando non sarebbe sempre assolutamente necessario. \\
+Proprio per la funzione dell'\textit{if}, ad ogni passaggio del \textit{while}, l'algoritmo includerà nell'insieme \textit{Sol} un numero \textit{K} di archi che legano nodi sicuramente differenti per ogni \textit{K}, che ammontano quindi a \textit{2K} (perché per ogni arco di \textit{K}, questo lega due nodi tra loro). Di conseguenza, sapendo che la soluzione ottimale porterebbe ad un numero di nodi pari ad \textit{almeno} \textit{K} (perché di fatto, l'algoritmo prende per ogni \textit{K} entrambi i nodi, ma non sappiamo se in realtà necessiti di uno solo dei due), il \textit{rapporto d'approssimazione} risultante è il seguente:
+\begin{center}
+	$\frac{c(soluzione trovata)}{c(soluzione ottima)} = \frac{2K}{almeno K} \leq \frac{2K}{K} = 2$
+\end{center}
