@@ -87,3 +87,61 @@ Ho un grafo connesso, i cui archi sono colorati. Voglio dimostrare la validità 
 	\end{algorithmic}
 \end{algorithm} \\ \hfill
 \textbf{Soluzione:} Questo algoritmo fa leva sui colori che compaiono maggiormente nel grafo. Il problema è che esistono altri criteri che valorizzano dei colori piuttosto che altri, che vanno a scontrarsi con la regola del \textit{colore che compare più volte}: per esempio, che un dato arco di un dato colore è l'unico che rende il grafo connesso.
+
+\paragraph{7}
+Ho \textit{n} numeri ordinati in un vettore, contenente soltanto valori \textit{1} e \textit{2}: scrivere un algoritmo che in tempo $O(\log{n})$ restituisca il numero di \textit{1} contenuti nel vettore. \\
+\textbf{Suggerimento}: usare la ricerca binaria.
+\begin{algorithm}
+	\caption{Esercizio 7}\label{alg:es7}
+	\begin{algorithmic}[1]
+		\Function{algo}{}
+		\If { $V[n] = 1$ }
+		\Return n
+		\EndIf
+		\If { $V[n] = 2$ }
+		\Return $\phi$
+		\EndIf
+		\Return RicercaBinaria(1, n-1)
+		\EndFunction
+	\end{algorithmic}
+	\begin{algorithmic}[1]
+		\Function{RicercaBinaria(i, j)}{}
+		\State $m \gets \lfloor\frac{i+j}{2}\rfloor$
+		\If $V[m] = 1$ \&\& $V[m+1] = 2$
+		\Return m
+		\EndIf
+		\If $V[m] = 1$
+		\Return RicercaBinaria(m+1, j)
+		\EndIf
+		\Return RicercaBinaria(i, m-1)
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \\ \hfill
+\newpage
+
+\paragraph{8}
+Ho \textit{n} numeri ordinati in un vettore, contenente soltanto valori \textit{1}, \textit{2} e \textit{3}: scrivere un algoritmo che in tempo $O(\log{n})$ restituisca il numero di \textit{1} e \textit{3}. \\
+\textbf{Suggerimento}: usare la ricerca binaria.
+\begin{algorithm}
+	\caption{Esercizio 7}\label{alg:es8}
+	\begin{algorithmic}[1]
+		\Function{algo}{}
+		\If { $V[n] = 1$ }
+		\Return n
+		\EndIf
+		\If { $V[n] = 3$ }
+		\Return n
+		\EndIf
+		\Return RicercaBinaria(1, n-1)
+		\EndFunction
+	\end{algorithmic}
+	\begin{algorithmic}[1]
+		\Function{RicercaBinaria(i, j)}{}
+		\State \ldots
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \\ \hfill
+
+\paragraph{9}
+Dato un grafo diretto, occorre dimostrare se può essere stato generato tramite una visita \textit{DFS} utilizzando liste di adiacenza. Se sì, dimostrare come è strutturato il grafo. \\
+\textbf{Soluzione}: partendo dal grafo proposto, scrivere le liste di adiacenza. Una volta scritte, partendo da quelle - e nello specifico dal nodo che ha solo archi (di visita) entranti -, verificare che con queste posso arrivare - tramite la visita - a ottenere lo stesso grafo/albero.

@@ -46,3 +46,35 @@ Proprio per la funzione dell'\textit{if}, ad ogni passaggio del \textit{while}, 
 \begin{center}
 	$\frac{c(soluzione trovata)}{c(soluzione ottima)} = \frac{2K}{almeno K} \leq \frac{2K}{K} = 2$
 \end{center}
+
+\section{Massimizzazione e minimizzazione}
+Si suppone di avere un dato insieme di oggetti $\{P_{1}, P_{2}, \ldots, P_{n}\}$ ciascuno con dato peso, con un contenitore di capacità massima \textit{C}. Abbiamo due problemi simili (che si vedrà hanno però  complessità diversa):
+\begin{enumerate}
+	\item individuare il sottoinsieme di dimensione massima degli oggetti che entrino nel contenitore (problema di massimizzazione, risolvibile in tempo polinomiale);
+	\item saturare il contenitore riempiendolo col minor numero possibile di oggetti (problema di minimizzazione).
+\end{enumerate}
+
+\subsection{Problema di massimizzazione}
+Un semplicissimo algoritmo \textit{greedy} prenderebbe - in ordine crescente di dimensione - il primo oggetto e lo inserirebbe nel contenitore. Troverebbe poi il prossimo: qualora entrasse per dimensione nel contenitore, lo inserirebbe, altrimenti si fermerebbe. Ripeterebbe quindi questo passaggio finché ci sarebbe spazio a sufficienza. Questo algoritmo trova una soluzione ammissibile: non c'è un altro insieme che possa trovare una soluzione migliore la soluzione al problema: $O(n\times \log{n})$ per ordinarlo, e $O(n)$ per saturare il contenitore.
+
+\subsection{Problema di minimizzazione}
+Analogamente, un algoritmo potrebbe prendere ad ogni passo l'oggetto che occupa più spazio, specularmente all'algo precedente. Quando arriva al momento in cui non riesce ad entrare il prossimo oggetto, non si ferma, ma continua a verificare con oggetti sempre più piccoli, finché c'è spazio. \\ Stavolta la cosa non funziona come desiderato. Avendo infatti tre oggetti $\{7, 5, 5, 1, 1\}$ con contenitore di capienza $C=10$, prenderebbe il \textit{7}, senza poi poter prendere i \textit{5}; prenderebbe allora i due \textit{1}, arrivando a \textit{9}; la soluzione migliore però sarebbe quella di prendere soltanto i due \textit{5}, saturando completamente lo spazio, con un numero minore di elementi, mentre nella nostra soluzione abbiamo avuto bisogno di prendere \textit{3} elementi per poterlo fare. Infatti, il nostro obiettivo è unicamente trovare il numero minimo di oggetti per saturarlo, non quello di trovarne il minor numero per arrivare a saturare \textit{meglio} il contenitore. \\
+Quindi l'euristica proposta non funziona: infatti, non esistono in assoluto soluzioni al problema note.
+Una soluzione potrebbe essere confrontare tutti i possibili sottoinsiemi degli oggetti, tenendo quello di dimensione più piccola, il che porterebbe già a $\Omega(2^n)$.
+\newpage
+
+\section{Divide et Impera}
+Ho un grosso problema: fosse più piccolo sarebbe più semplice. L'approccio \textit{divide et impera} divide in 2 (o più) sottoproblemi (divisibili, eventualmente, a loro volta, in altri sottoproblemi), analizzandoli e risolvendoli in maniera indipendente l'uno dall'altro, per poi ricomporre le varie sottosoluzioni:
+\begin{center}
+	$T(n) = a\times T(\frac{n}{b}) + O(f(n))$ \\
+	dove \textit{T(n)} è il tempo totale, e \textit{a} e \textit{b} sono costanti generalmente settate a 2.
+\end{center}
+In un buon \textit{divide et impera}, bisogna cercare di tenere la scomposizione (il costo dei sottoproblemi) il più bilanciato possibile.
+
+\subsection{Teorema Master}
+Il \textit{master theorem} serve come ricettario per arrivare alla complessità di un algoritmo che sfrutta l'approccio \textit{divide et impera}, articolandosi in tre casistiche:
+\begin{enumerate}
+	\item $\log_{b}{a} > c \Rightarrow \Theta(n^{\log_{b}{a}})$
+	\item $\log_{b}{a} = c \Rightarrow O(n^c\times \log^{k+1}{n})$
+	\item $\log_{b}{a} < c \Rightarrow O(n^c\times \log^k{n})$
+\end{enumerate}
