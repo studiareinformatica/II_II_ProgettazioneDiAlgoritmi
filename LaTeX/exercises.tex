@@ -41,8 +41,8 @@ Per ovviare a questo problema e raggiungere un costo di $O(n)$:
 \begin{algorithm}
 	\caption{Esercizio 5}\label{alg:es5-2}
 	\begin{algorithmic}[1]
-		\Function{contaDistanze}{}
-		\State $i \gets -1$
+		\Function{contaDistanze}{$i$}
+		\State $Dist(i) \gets -1$
 		\For { $i \gets 1$ to \textit{n}}
 			\If { $Dist(i) = -1$ }
 				\State $calcola(i)$
@@ -51,7 +51,7 @@ Per ovviare a questo problema e raggiungere un costo di $O(n)$:
 		\EndFunction
 	\end{algorithmic}
 	\begin{algorithmic}[1]
-		\Function{calcola(i)}{}
+		\Function{calcola}{$i$}
 		\If { $i = u$ }
 			\State $ Dist(i) = 0 $
 		\ElsIf { $Dist(P[i]) \neq -1$ }
