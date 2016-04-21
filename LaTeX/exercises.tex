@@ -145,3 +145,85 @@ Ho \textit{n} numeri ordinati in un vettore, contenente soltanto valori \textit{
 \paragraph{9}
 Dato un grafo diretto, occorre dimostrare se può essere stato generato tramite una visita \textit{DFS} utilizzando liste di adiacenza. Se sì, dimostrare come è strutturato il grafo. \\
 \textbf{Soluzione}: partendo dal grafo proposto, scrivere le liste di adiacenza. Una volta scritte, partendo da quelle - e nello specifico dal nodo che ha solo archi (di visita) entranti -, verificare che con queste posso arrivare - tramite la visita - a ottenere lo stesso grafo/albero.
+\newpage
+
+\paragraph{Es1 (4pti)}
+Si consideri il grafo G in figura e l'albero T degli archi marcati. Partendo da quali nodi l'albero T può essere stato prodotto da una visita DFS e/o BFS? Motivare bene la risposta. \\
+\textbf{Soluzione}:
+\begin{itemize}
+	\item \textit{BFS}: con BFS necessariamente non si può essere partiti da tutti i nodi esclusi 8 e 5, perché avrebbe dovuto visitare prima tutti gli adiacenti, e così non è per tutti gli altri nodi. Partendo da 5, è corretta l'iterazione fino a raggiungere il nodo 2, per il quale, però, si sarebbe dovuto visitare non solo il 6, ma anche il 2, prima di poter continuare con l'iterazione sugli adiacenti: anche il 5 è scarato. Analogamente, partendo da 8, è corretta l'iterazione, dando per vero che il 2 è stato il primo visitato, l'iterazione è corretta fino a 3, dove ancora una volta, va in errore, perché avrebbe dovuto visitare prima il 4 partendo dallo stesso 3, invece di passare per il 5. Di conseguenza, non è possibile la BFS.
+	\item \textit{DFS}: in un albero derivato dalla visita DFS deve essere escluso necessariamente un qualsiasi arco cross. Partendo da 8, seguendo con 9, la DFS selezionerebbe necessariamente l'arco {9,1}, seguendo con 1, o l'arco {1,2} o {1,9}, seguendo con 2, l'arco {2,1}, seuendo con 7, l'arco {7,6}. Tutti gli archi non inseriti dalla DFS devono essere necessariamente archi all'indietro. Di conseguenza, poiché - da qualsiasi nodo si parta - si incontrerà un arco di cross, l'albero in figura non può essere generato da una DFS. Quindi per dimostrare che - a partire da un albero - questo non può essere stato generato da una DFS, occorrerà trovare, tra gli archi non inclusi nell'albero, un arco che connette due nodi che, nell'albero, non sono uno l'antenato dell'altro (ovvero, i cross).
+\end{itemize}
+\newpage
+
+\paragraph{Es2 (8pti)}
+Elaborare lo pseudocodice di un algoritmo che preso in input un grafo non diretto e connesso G su un nodo u, il vettore dei padri P prodotto dalla BFS da u in G e l'arco {v,w} di G ritorna true se e solo se la rimozione di {v,w} non cambia la distanza da u. Il tutto in O(n). \\
+\textbf{Soluzione}:
+\begin{algorithm}
+	\caption{Esercizio 2}\label{alg:es2}
+	\begin{algorithmic}[1]
+		\Function{algo}{$P, \{v,w\}$}
+			\State costruisci l'albero T a partire dal vettore dei padri P, in $O(n)$
+			\State costruisci il vettore delle distanza D con BFS a partire dall'albero T, in $O(n)$
+			\If { $P[v] \neq w$ and $P[w] \neq v$ }
+				\State \Return true
+			\Else
+				\If { $P[v] = w$ }
+					\For {$k \in adj(v)$}
+						\If { $D[k] = D[v]$ and $k \neq w$ }
+							\State \Return true
+						\EndIf
+					\EndFor
+				\ElsIf { $P[w] = v$ }
+					\For {$k \in adj(w)$}
+						\If { $D[k] = D[w]$ and $k \neq v$ }
+							\State \Return true
+						\EndIf
+					\EndFor
+				\EndIf
+			\EndIf
+			\State \Return false
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \\ \hfill
+La costruzione dell'albero con il vettore dei padri P costa $O(n)$, sommata alla costruzione del vettore delle distane D con BFS sull'albero T che costa $O(n)$, arriviamo a $2 \times O(n)$. Infine, nella sezione finale ha costo rilevando soltanto il check sugli adiacenti di $w$ o $v$, che può costare al massimo $n-1$: $O(n)$. Quindi $2 	\times O(n) + O(n)$ equivale asintoticamente a $O(n)$.
+\newpage
+
+\paragraph{Es3 (8pti)}
+Per un grafo diretto G diciamo che un arco {u,v} è interno se u e v appartengono alla stessa componente fortemente connessa, e altrimenti diciamo che esterno. In relazione con una qualsiasi DFS, rispondere alle seguenti domande:
+\begin{enumerate}
+	\item un arco all'indietro può essere esterno?
+	\item un arco in avanti può essere interno?
+	\item un arco di attraversamento può essere interno?
+	\item un arco di attraversamento deve essere esterno?
+\end{enumerate}
+Per ognuna, in caso affermativo, esibire un esempio, altrimenti dimostrare l'impossibilità. \\
+\textbf{Soluzione:}
+\begin{enumerate}
+	\item un arco all'indietro è necessariamente interno perché sarà - in un albero - la componente fondamentale per determinare una componente fortemente connessa, perché determina un ciclo con la concatenazione di nodi, da ascendente a discendente (vedi algoritmo di Tarjan, con definizione di c-root). $\Rightarrow$  deve essere interno;
+	\item un arco in avanti può essere interno considerando il caso in cui la componente considerata coinvolga un arco all'indietro che raggiunga o il nodo d'origine dell'arco in avanti, o vada più in alto, e che parta da un nodo che è il nodo di origine dell'arco in avanti, o più in basso. $\Rightarrow$ può essere interno;
+	\item un arco di attraversamento può essere interno anche semplicemente considerando il caso in cui abbiamo un albero diretto di tre nodi. Sostanzialmente, se i due nodi figli sono legati da un arco di attraversamento, può esistere il caso in cui a partire da quello raggiungo vi sia un arco all'indietro verso la radice. $\Rightarrow$ può essere interno;
+	\item la risposta fornita alla domanda precedente stabilisce un controesempio alla seguente domanda. Pertanto, no: un arco di attraversamento non \textit{deve} necessariamente interno.
+\end{enumerate}
+\newpage
+
+\paragraph{Es4 (10pti)}
+In un museo c'è un lungo corridoio rettilineo in cui sono esposti $n$ quadri nelle posizioni $q_{1} < q_{2} < \ldots < q_{n}$. Un custode può sorvegliare i quadri che si trovano al più a distanza 5 dalla sua posizione. Vogliamo sorvegliare tutti i quadri con un numero minimo di custodi. Dare lo pseudocodice di un algoritmo che trova le posizioni di un numero minimo di custodi che sorvegliano gli $n$ quadri. La complessità dell'algoritmo deve essere $O(n)$. Dare la dimostrazione di correttezza dell'algoritmo proposto. \\
+\textbf{Soluzione}:
+\begin{algorithm}
+	\caption{Esercizio 4}\label{alg:es4}
+	\begin{algorithmic}[1]
+		\Function{algo}{$n$}
+			\State inizializzo C come vettore di soli 0
+			\For { $i \gets 1$ to $n$ }
+				\If { $i\%11 = 6$ }
+					\State $C[i] \gets 1$
+				\EndIf
+			\EndFor
+			\If { $n\%11 < 6$ }
+				\State $C[n] = 1$
+			\EndIf
+			\State \Return C
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \\ \hfill
