@@ -79,3 +79,85 @@ Il \textit{master theorem} serve come ricettario per arrivare alla complessità 
 	\item $\log_{b}{a} < c \Rightarrow O(n^c\times \log^k{n})$
 \end{enumerate}
 
+\paragraph{Esercizio}
+Ho un vettore con \textit{n} interi distinti: voglio scrivere una procedura $Sel(V,k)$ che selezioni il \textit{k}-esimo elemento del vettore - dopo averlo ordinato. \\
+Il primo metodo è applicare un ordinamento sul vettore e poi selezionare - in $O(1)$ - l'elemento \textit{k}: questo metodo ha complessità $O(n\times \log{n})$ (dove proprio $n \times \log{n}$ è il costo minimo dell'ordinamento). \\
+Possiamo poi pensare che \textit{k} possa essere o il primo o l'ultimo elemento, in questo caso occorrerebbe rispettivamente ricavarsi o il minimo o il massimo del vettore: in entrambi i casi, costerebbe $O(n)$. \\
+Il primo metodo però non permette di sapere soltanto l'elemento - nel vettore ordinato equivalente - in posizione \textit{k}, ma potenzialmente un qualsiasi elemento in posizione da 0 a \textit{n}: sembra fare quindi molto di più rispetto a quanto necessario. \\
+L'alternativa potrebbe invece essere l'applicazione di \textit{Dijkstra}, attraverso cui potremmo calcolarci il cammino minimo per raggiungere \textit{k}: questo - ugualmente - andrebbe a costarci tot, quando in realtà tutte le funzionalità che offre non sono assolutamente necessarie.
+Questo soltanto per dire che il discorso di pensare che un algoritmo che fa più di quanto assolutamente necessario dalla consegna non necessariamente è più complesso. \\
+Vogliamo scrivere una procedura che lavori in $O(n)$, che lavori in \textit{divide et impera} con una sorta di \textit{quickSort}. L'idea è quella di evitare di ordinare completamente il vettore, ma di farlo soltanto fino all'elemento \textit{k}: con \textit{quickSort} si prendeva un perno da cui partire randomicamente, nel nostro caso partiamo dal primo elemento del vettore in input.
+\newpage
+L'algoritmo ci suddividerà il vettore in due sub-vettori, dove il punto di separazione è proprio il perno:
+\begin{itemize}
+	\item insieme A, che contiene tutti gli elementi $< x$, dove $x$ è il perno;
+	\item insieme B, che contiene tutti gli elementi $\geq x$.
+\end{itemize}
+A questo punto verifichiamo che la cardinalità di \textit{A} sia $\geq k$: se così fosse, applichiamo lo stesso algoritmo ricorsivamente sullo stesso perno, ma sul sub-vettore \textit{A} ($Sel(A,k)$); altrimenti, lo applichiamo sul perno $k-|A|$ e sub-vettore \textit{B} ($Sel(B, k-|A|$). Decidiamo allora di introdurre un nuovo input alla procedura \textit{n}, che indichi la capienza del vettore, che ci permetta di analizzare ad ogni passaggio la grandezza del vettore rimanente ricorsivamente (inserendo uno \textit{statement} all'inizio della procedura, che ci farà ritornare l'unico elemento del vettore, se $n=1$). \\
+\begin{algorithm}
+	\caption{Algoritmo individuazione elemento in posizione K del vettore ordinato V}\label{alg:KinV}
+	\begin{algorithmic}[1]
+		\Function{algo}{$V, k, n$}
+			\If { $n=1$ }
+				\State \Return $V[1]$
+			\EndIf
+			\State $x \gets V[1]$
+			\State $contA = contB = \phi$
+			\For { $i \gets 2$ to $n$ }
+				\If { $V[i] < x$ }
+					\State $contA++$
+					\State $A[contA] \gets V[i]$
+				\Else
+					\State $contB++$
+					\State $B[contB] \gets V[i]$
+				\EndIf
+			\EndFor
+			\If { $contA = k-1$ }
+				\State \Return $x$
+			\EndIf
+			\If { $contA \geq k $ }
+				\State \Return $Sel(A, k, contA)$
+			\Else
+				\State \Return $Sel(B, k-(contA+1), contB)$
+			\EndIf
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Analizziamo ora il costo di tempo della procedura:
+\begin{itemize}
+	\item il \textit{for} ci costa \textit{n}: $O(n)$;
+	\item il restante dipende da \textit{A} e \textit{B}: $T(max\{contA,contB\})$ - nel caso pessimo.
+\end{itemize}
+Ora cerchiamo di lavorare sul tempo calcolato nel caso pessimo: il \textit{max} può variare da 1 a $n-1$. Quindi nel caso pessimo, $T(n) \leq T(n-1) + O(n)$. Nel caso più bilanciato possibile, invece: $T(n) \leq T(\frac{n}{2}) + O(n)$. La prima, utilizzando il \textit{master theorem}, ci porta a $O(n^2)$, mentre la seconda a $O(n)$. La verità quindi si suppone sia una via di mezzo tra questi ultimi. Nella maggior parte dei casi accade la seconda, probabilisticamente parlando, ma lo vogliamo dimostrare. \\
+Per il \textit{master theorem}: $\log_{b}{a} = \log_{2}{1} = 0$. Ma abbiamo detto che in questo caso, il perno occorre che sia al centro, perfettamente bilanciato. Calcoliamo il caso in cui il perno sia - invece che ad $\frac{1}{2}$ - ad $\frac{1}{4}$: la ricorrenza sarà $T(n) \leq T(\frac{3n}{4}) +O(n)$. Quindi, $\log_{\frac{4}{3}}{1} = 0$. A maggior ragione, non è necessario che il perno sia perfettamente bilanciato, perché la ricorrenza sia $\leq T(\frac{n}{2}) + O(n)$. Ancora una volta, se il perno si trova a $\frac{1}{100}$, ancora il $\log_{\frac{100}{99}}{1} = 0$, e quindi la ricorrenza precedente sarà ancora valida. \\
+Di conseguenza, è verificato che - fintanto che l'insieme maggiore è una frazione dell'insieme originale - la normalità sembra essere quella in cui la ricorrenza è rappresentata da:
+\begin{center}
+	$T(n) \leq T(\frac{n}{2}) + O(n)$ \\
+	e quindi, la complessità: $O(n)$
+\end{center}
+Per garantire che questo sia il caso della nostra procedura, occorre che - una volta scelto un elemento randomicamente nel vettore - questo sia scambiato con il primo elemento del vettore. Occorre quindi aggiungere questo snippet in testa alle istruzioni della procedura:
+\begin{algorithm}
+	\label{alg:KinVPatch}
+	\begin{algorithmic}[1]
+		\State $r \gets Random(1,n)$
+		\State scambia $V[1]$ con $V[r]$
+		\State $x \gets V[1]$
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+
+\paragraph{Alternativa}
+Ma questo è un algoritmo che garantisce $O(n)$ nel caso medio probabilistico. Ne esiste anche uno che garantisce $O(n)$ nel caso peggiore probabilistico: prendiamo una matrice $A \times B = C$, nata dal prodotto di due matrici \textit{A} ($n \times n$) e \textit{B} ($n \times n$). Per molto tempo si è pensato che il costo minimo di una procedura che eseguisse questo prodotto fosse di $n^3$ (dove \textit{n} è l'ampiezza delle matrici, ovviamente quadrate). Col tempo si è passati a considerarlo invece $n^{2.7}$, poi ancora $n^{2.3}$, utilizzando il metodo \textit{divide et impera} (con \textit{lower bound $\Omega(n^2)$}).
+\newpage
+
+\paragraph{Problema}
+Ho \textit{n} punti in un piano: mi interessa la coppia di punti più vicini. \\
+Un primo algoritmo banale sarebbe confrontare tutte le coppie: le combinazioni saranno pari a $(n$su$2) \approx O(n^2)$. A questo va aggiunto il tempo per calcolare la distanza fra due punti: $\sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}$. \\
+Il problema è che non è possibile calcolare la radice in $O(1)$: utilizziamo quindi il calcolo del quadrato della distanza, così da poterla calcolare in $O(1)$, raggiungendo come complessità globale $O(n^2)$. \\
+Supponiamo di lavorare su una sequenza di punti che hanno soltanto una coordinata dell'ascissa \textit{x}, perché si trovano tutti sulla stessa ordinata: per capire la coppia di punti più vicini, occorre solamente ordinarli ($O(n \times \log{n})$) e poi scorrerli per leggere le distanze di ciascuno ($O(n)$). Costerà $O(n \times \log{n})$. \\
+Tornando al primo problema, l'idea per ottimizzare al massimo è quella di utilizzare il metodo \textit{divide et impera}, dividendo quindi in due sottoproblemi:
+\begin{center}
+	$T(n) = 2T(\frac{n}{2}) + O($ composizione scomposizione $) + O($ costo composizione $)$ \\
+	dove il costo di composizione/scomposizione deve raggiungere - sommato - al massimo $O(n)$.
+\end{center}
+Supponiamo di partizionare l'insieme di punti in due sottoinsiemi, inserendo un asse delle ordinate - per esempio - nel gruppo di punti: l'importante è che la scomposizione venga fatta sulla componente \textit{x} di ciascun punto, ordinando poi - ancora sulla componente \textit{x} - in $O(n \times \log{n})$. Usiamo poi l'algoritmo \textit{divide et impera} dividendo il problema in due sottoproblemi bilanciati. \\
+Supponiamo che ho ottnuto la coppia più vicina nei 2 sottoproblemi. Quanto tempo ci metto a ricomporli? Non possiamo scegliere il minore tra i due $\delta$ (dove $\delta_1$ è la coppia meno distante nel sottoinsieme \textit{A} e $\delta_2$ è la coppia meno distante nel sottoinsieme \textit{B}), perché ci potrebbe essere una distanza ancora minima tra un punto di \textit{A} ed un punto di \textit{B}. Occorre quindi trovare un metodo valido per comporre i due sottoproblemi adeguatamente.
