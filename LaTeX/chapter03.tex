@@ -160,4 +160,57 @@ Tornando al primo problema, l'idea per ottimizzare al massimo è quella di utili
 	dove il costo di composizione/scomposizione deve raggiungere - sommato - al massimo $O(n)$.
 \end{center}
 Supponiamo di partizionare l'insieme di punti in due sottoinsiemi, inserendo un asse delle ordinate - per esempio - nel gruppo di punti: l'importante è che la scomposizione venga fatta sulla componente \textit{x} di ciascun punto, ordinando poi - ancora sulla componente \textit{x} - in $O(n \times \log{n})$. Usiamo poi l'algoritmo \textit{divide et impera} dividendo il problema in due sottoproblemi bilanciati. \\
-Supponiamo che ho ottnuto la coppia più vicina nei 2 sottoproblemi. Quanto tempo ci metto a ricomporli? Non possiamo scegliere il minore tra i due $\delta$ (dove $\delta_1$ è la coppia meno distante nel sottoinsieme \textit{A} e $\delta_2$ è la coppia meno distante nel sottoinsieme \textit{B}), perché ci potrebbe essere una distanza ancora minima tra un punto di \textit{A} ed un punto di \textit{B}. Occorre quindi trovare un metodo valido per comporre i due sottoproblemi adeguatamente.
+Supponiamo di aver ottenuto la coppia più vicina nei 2 sottoproblemi. Quanto tempo sarebbe necessario per ricomporli? \\
+Non possiamo scegliere il minore tra i due $\delta$ (dove $\delta_1$ è la coppia meno distante nel sottoinsieme \textit{A} e $\delta_2$ è la coppia meno distante nel sottoinsieme \textit{B}), perché ci potrebbe essere una distanza ancora minima tra un punto di \textit{A} ed un punto di \textit{B}.\\
+%Occorre quindi trovare un metodo valido per comporre i due sottoproblemi adeguatamente.
+%-------------------------%
+Occorre dimostrare che la ricomposizione ha costo $ O(n) $.
+
+Iniziamo con il dimostrare che la ricomposizione possa costare $ O(n\log{n}) $
+Per cominciare, calcoliamo $ \bar{\delta} = \min\{\delta_1, \delta_2\}$.
+\textbf{Costo:} $ O(1) $.
+Per eseguire una riduzione del piano, partire dal centro e tracciare due segmenti di lunghezza $ \bar{\delta} $ a sinistra e a destra, ottenedo una selezione di dimensione $ 2\bar{\delta} $. Da questo momento in poi, considereremo come inutili i punti al di fuori della selezione.\\
+\textbf{Costo:} $ O(n) $.\\
+Se i punti sono equamente distribuiti, la correttezza della selezione (quindi la presenza in essa di una bassa densità di punti) è palese; è altrettanto evidente, però, che questa certezza non è data a priori - ed è necessario fornire un algoritmo che prenda in considerazione il caso peggiore.%; pertanto, per provare la correttezza della nostra selezione, quindi, occorre ricorrere ad un altro stratagemma.\\
+Sappiamo per certo che la selezione di punti è $ m \le n $. Non possiamo permetterci di dividerli semplicemente per 2, non sapendo se $ m \% 2 = 0 $.
+Avendo già ordinato i punti rispetto ad $ x $, applichiamo lo stesso ordinamento rispetto ad $ y $.\\
+\textbf{Costo:} $ O(n \log{n}) $.\\
+Confrontiamo ora ogni punto con i 7 punti seguenti; se non trovo una coppia che dista meno di $ \bar{\delta} $, passo al seguente.\\
+\textbf{Costo: } $ O(n) $ poichè $ m \le n $ e il ciclo impiega al più $ 7n $.\\
+Suddividere la selezione in una griglia di quadrati $ \frac{\bar{\delta}}{2} \times \frac{\bar{\delta}}{2}$. Notare che se in qualsiasi quadrato troviamo due punti avremo una contraddizione, perchè la loro distanza sarebbe minore di $ \bar{\delta} $: in ogni quadrato avremo al più un punto.\\ % Manca una parte.
+\textbf{Costo totale:} $ O(1) + O(n) + O(n \log{n}) + O(n) \approx O(n \log{n})$. % poi dimostra che O(nlogn) diventa O(n), ma non ho capito come.
+
+\paragraph{Programmazione dinamica: Fibonacci} \textit{Fornire un algoritmo che prenda in input n e produca l'n-esimo numero di Fibonacci.}\\
+Un primo algoritmo che potrebbe venire in mente è il seguente:
+\begin{algorithmic}
+	\Function{Fibo}{n}
+		\If{$ n \le 1 $}
+			\Return 1
+		\EndIf
+		\State $ a = Fibo(n-1) $
+		\State $ b = Fibo(n-2) $
+		\State \Return $ a+b $
+	\EndFunction
+\end{algorithmic}
+La soluzione non è ottimale.\\
+$ T(n) = T(n-1)+T(n-2)+ O(1) $\\
+$ T(n) \le T(n-1) + T(n-1) + O(1)  = 2 \times T(n-1) + O(1)$\\
+$ T(n) \le 2^{n} $ ,\\
+ma anche\\
+$ T(n) = T(n-1)+T(n-2)+ O(1) $\\
+$ T(n) \ge T(n-2) + T(n-2) + O(1)  = 2 \times T(n-2) + O(1)$\\
+$ T(n) \ge 2^{\frac{n}{2}}$;\\
+quindi\\
+$ 2^{n} \le T(n) \le 2^{\frac{n}{2}}$.
+Analizzando più attentamente la struttura dell'algoritmo possiamo notare come sia presente \textit{overlapping} di sottoproblemi: l'algoritmo in questione calcola più volte la stessa operazione; questo evidenzia una pessima divisione di problemi.\\
+Dobbiamo quindi fare in modo che l'algoritmo sappia determinare di aver già calcolato un qualsiasi $ fib(x) $. Per fare questo sono necessarie delle tabelle; pagheremo in spazio ma guadagneremo in tempo di esecuzione.\\
+La soluzione migliore in questo caso è istanziare un vettore di $ n $ posti. Controllando la presenza di $ T[x] $ è possibile eliminare completamente la ricorsione:
+\begin{algorithmic}
+	\Function{Fibo}{n, T}
+		\State $ T[0] = T[1] = 1 $
+		\For{$ i \gets 2 \to n $}
+			\State $ T[i] = T[i-1] + T[i-2] $
+		\EndFor
+		\Return $ T[n] $
+	\EndFunction
+\end{algorithmic}
