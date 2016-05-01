@@ -214,3 +214,90 @@ La soluzione migliore in questo caso è istanziare un vettore di $ n $ posti. Co
 		\Return $ T[n] $
 	\EndFunction
 \end{algorithmic}
+
+\paragraph{Problema}
+Abbiamo un vettore di $n$ locazioni che contiene degli interi positivi o negativi. Cerchiamo, dentro questo vettore, di individuare un sottovettore con valore massimo, definito definito come la somma massima di elementi del vettore stesso. \\
+Si tratta di un problema di ottimizzazione: in questo caso, prima di cercare la soluzione, bisogna cercare di scoprire qual è il valore ottimo, per poi trovare l'oggetto che lo concretizzi. Inoltre, prima di trovare un algoritmo ottimo, se ne prova uno semplice per analizzare quanto è possibile accada tramite una ricerca esaustiva. In questo caso la ricerca esaustiva ci porta a cercare tutti i sottovettori: si tratta di $O(n^2)$ sottovettori. \\
+Perché? Perché un sottovettore è individuato dal punto in cui inizia fino al punto in cui finisce: sostanzialmente è una coppia di indici \textit{inizio} e \textit{fine}. Quante coppie posso creare? $\frac{n\times(n-1)}{2}$ (diviso due, perché non considero le coppie uguali $(2,5)$ e $(5,2)$). In questo calcolo escludo i sottovettori da un solo elemento, per cui: $\frac{n\times(n-1)}{2} + n \Rightarrow O(n^2)$. Elaboriamo uno pseudocodice di base:
+\begin{algorithm}
+	\label{alg:subV1}
+	\begin{algorithmic}
+		\Function{subvectorV1}{V}
+			\State $max \gets \phi$
+			\For { $i \gets 1$ to $n-1$ }
+				\For { $f \gets 1$ to $n$ }
+					\State $a \gets$ sommatoria da $i$ a $f$ nel vettore $V$
+					\If { $a > max$ }
+						\State $max \gets a$
+					\EndIf
+				\EndFor
+			\EndFor
+			\State \Return max
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Data l'eccessiva complessità, elaboriamone una nuova versione:
+\begin{algorithm}
+	\label{alg:subV2}
+	\begin{algorithmic}
+		\Function{subvectorV2}{V}
+			\State $max \gets \phi$
+			\For { $i \gets 1$ to $n-1$ }
+				\State $a \gets \phi$
+				\For { $f \gets 1$ to $n$ }
+					\State $a \gets a + V[f]$
+					\If { $a > max$ }
+						\State $max \gets a$
+					\EndIf
+				\EndFor
+			\EndFor
+			\State \Return max
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Questa seconda versione avrà, invece, come complessità, $O(n^2)$. \\
+Se esistono algoritmi che permettono di fare questa operazione in un tempo minore, significa che esiste un procedimento tale da permettere di scartare l'analisi di un numero variabile di sottovettori. \\
+Quando si ha un vettore, si ha una struttura lineare, che è possibile spezzettare. Il primo approccio da utilizzare è il \textit{divide et impera}: perché il \textit{divide et impera} risulti efficiente, dobbiamo dividere il problema in maniera bilanciata, cercando di evitare l'\textit{overlapping} di sottoproblemi. Divididendo il vettore a metà, abbiamo due problemi distinti, per cui sembra non presentarsi \textit{overlapping}. Per trovare una soluzione attraverso il calcolo di una soluzione dei due sottoproblemi, sembra essere richiesto: $T(n) = 2\times T(\frac{n}{2})$. \\
+\newpage
+
+Un esempio di procedura risolutiva:
+\begin{algorithm}
+	\label{alg:subDIV1}
+	\begin{algorithmic}
+		\Function{subvectorV3}{i,j}
+			\If { $i = j$ }
+				\State \Return $V[i]$
+			\EndIf
+			\State $k \gets \lfloor\frac{i+j}{2}\rfloor$
+			\State $a \gets subvector(i,k)$
+			\State $b \gets subvector(k+1,j)$
+			\State \Return $max\{a,b\}$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+In questo caso, però, la ricomposizione del problema gioca un ruolo cruciale ed è totalmente assente: mentre \textit{a} e \textit{b} rapprentano il valore massimo dei sottovettori sinistro e destro, non abbiamo un valore che rappresenti il valore massimo del sottovettore che si trova \textit{a cavallo} tra il punto di incrontro dei due sottovettori \textit{a} e \textit{b}. Potendo scegliere come punto di partenza per quel sottovettore un qualsiasi elemento del sottovettore \textit{a} (e quindi $\frac{n}{2}$) e come funto di fine un qualsiasi elemento del sottovettore \textit{b} (e quindi $\frac{n}{2}$), allora: $\frac{n}{2} \times \frac{n}{2} = \frac{n^2}{4} \Rightarrow T(n) = 2\times T(\frac{n}{2}) + O(n^2)$. \\
+Quindi occorre trovare una soluzione al sottoproblema di trovare un sottovettore del valore massimo che sia a cavallo tra i sottovettori \textit{a} e \textit{b}, senza dover necessariamente pagare - come già visto - $O(n^2)$. \\
+Con due cicli \textit{for} potremmo iterare, a partire dal centro verso gli estremi, per ciascuno dei due sottovettori \textit{a} e \textit{b}, calcolandoci il valore maggiore con $V[\frac{n}{2}]$, poi con $V[\frac{n}{2}-1]$, fino al primo elemento, e poi analogamente anche con il sottovettore \textit{b}, arrivando ad una complessità massima di $O(n)$.
+A questo punto:
+\begin{algorithm}
+	\label{alg:subDIV2}
+	\begin{algorithmic}
+		\Function{subvectorV3}{V,n}
+			\State $max \gets \phi$
+			\For { $i \gets 1$ to $n$ }
+				\State calcola $T[i]$
+				\If { $T[i] > max$ }
+					\State $max \gets T[i]$
+				\EndIf
+			\EndFor
+			\State \Return max
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Calcolare $T[i]$ significa:
+\begin{itemize}
+	\item se $i=1 \Rightarrow V[i]$
+	\item altrimenti $max\{T[i-1]+V[i], V[i]\}$
+\end{itemize}
+Il che significa riuscire a calcolare $T[i]$ in $O(1)$. \\
+L'idea fondamentale è la definizione di una famiglia di problemi minimi tra loro, risolvibili efficientemente e tali per cui il mio problema originale faccia parte di quei problemi o sia risolvibile efficientemente da essi.
