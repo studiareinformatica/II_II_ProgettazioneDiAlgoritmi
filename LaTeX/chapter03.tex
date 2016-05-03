@@ -301,3 +301,42 @@ Calcolare $T[i]$ significa:
 \end{itemize}
 Il che significa riuscire a calcolare $T[i]$ in $O(1)$. \\
 L'idea fondamentale è la definizione di una famiglia di problemi minimi tra loro, risolvibili efficientemente e tali per cui il mio problema originale faccia parte di quei problemi o sia risolvibile efficientemente da essi.
+La programmazione dinamica quindi si prepone come obiettivo la risoluzione efficace di problemi: per farlo si prepara la risoluzione in due fasi, trovare il valore ricercato nel problema e trovare una soluzione generale al problema. Molto spesso si fa uso della costruzione di una tabella $T$ (tendenzialmente un vettore monodimensionale) di lunghezza $n$, dove $n$ sono i sottoproblemi: quindi per ogni valore $i$ di $T$, a $T[i]$ sarà associato il valore del ottovettore che vale di pià e termina con $V[i]$, il quale non è altro che il vettore che viene analizzato nella risoluzione del problema. \\
+Tornando al problema precedente, occorre trovare la soluzione dato un valore: se per trovare quel valore è costato $O(n)$, per ricostruire si impiegherà al massimo $O(n)$. Per costruire la tabella in questo caso si è usato una procedura ricorsiva, in base alle caselle precedenti a ciascuna. Per trovare una soluzione, occorre muoversi inversamente rispetto alla procedura usata nella prima fase. La regola ricorsiva associava ad ogni valore $T[i] = max\{V[i], T[i-1]+V[i]\}$. Occorre trovare la soluzione con il valore dell'estremo destro del sottovettore $j$ e il valore della soluzione $max$. Se $i=j$, allora il vettore è composto da un solo elemento, che deve essere necessariamente $=max$. Altrimenti, se è $<$, scorro verso sinistra partendo da $T[i]$, controllando che ogni somma degli elementi destri già analizzati con quelli presi in quel momento sotto esame, sia $=max$:
+\begin{algorithm}
+	\label{alg:subDIVpt2}
+	\begin{algorithmic}
+		\Function{subvectorPT2}{J,max}
+			\State $i \gets J$
+			\While { $max - V[i] \neq \phi$ }
+				\State $max \gets max - V[i]$
+				\State $i \gets i-1$
+			\EndWhile
+			\State \Return i
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Questo rappresenta il caso più semplice: sviluppando l'algoritmo per comprendere casi più complessi, $T$ viene popolato come la tabella contenente come elemento la lunghezza massima della sottosequenza che termina con $V[i]$. Quindi, partendo dall'elemento $J$ dato in input, sapremo che dovremo trovare gli elementi di una sottosequenza che ha lunghezza $T[J]$: questi sicuramente saranno alla sinistra dell'elemento $T[J]$, ma altrettanto sicuramente, non saranno direttamente adiacenti alla sua sinistra. Quindi, $T[i] =$
+\begin{enumerate}
+	\item se $V[i]=1$ è minimo in $\{V[1], V[i]\}$, 1;
+	\item altrimenti, $max\{T[j]\}+1$, per $1\leq j < i$.
+\end{enumerate}
+Quindi:
+\begin{algorithm}
+	\label{alg:subDIVpt2-2}
+	\begin{algorithmic}
+		\Function{subvectorPT2-2}{J,max}
+			\State $Sol \gets J$
+			\While { $lmax > 1$ }
+				\State $t \gets J$
+				\While { $T[t] \neq max$ or $V[t] > V[J]$ }
+					\State $t \gets t-1$
+				\EndWhile
+				\State metto $t$ in testa a $Sol$
+				\State $J \gets t$
+				\State $lmax \gets lmax-1$
+			\EndWhile
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Asintoticamente tutto questo quanto costa? La costruzione della tabella costerà $O(n^2)$. Orientativamente, anche la seconda parte non raggiungerà mai $O(n^2)$.
