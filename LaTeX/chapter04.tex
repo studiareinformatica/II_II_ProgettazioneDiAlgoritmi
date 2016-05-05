@@ -1,0 +1,184 @@
+\paragraph{Programmazione dinamica: Fibonacci} \textit{Fornire un algoritmo che prenda in input n e produca l'n-esimo numero di Fibonacci.}\\
+Un primo algoritmo che potrebbe venire in mente è il seguente:
+\begin{algorithmic}
+	\Function{Fibo}{n}
+		\If{$ n \le 1 $}
+			\Return 1
+		\EndIf
+		\State $ a = Fibo(n-1) $
+		\State $ b = Fibo(n-2) $
+		\State \Return $ a+b $
+	\EndFunction
+\end{algorithmic}
+La soluzione non è ottimale.\\
+$ T(n) = T(n-1)+T(n-2)+ O(1) $\\
+$ T(n) \le T(n-1) + T(n-1) + O(1)  = 2 \times T(n-1) + O(1)$\\
+$ T(n) \le 2^{n} $ ,\\
+ma anche\\
+$ T(n) = T(n-1)+T(n-2)+ O(1) $\\
+$ T(n) \ge T(n-2) + T(n-2) + O(1)  = 2 \times T(n-2) + O(1)$\\
+$ T(n) \ge 2^{\frac{n}{2}}$;\\
+quindi\\
+$ 2^{n} \le T(n) \le 2^{\frac{n}{2}}$.
+Analizzando più attentamente la struttura dell'algoritmo possiamo notare come sia presente \textit{overlapping} di sottoproblemi: l'algoritmo in questione calcola più volte la stessa operazione; questo evidenzia una pessima divisione di problemi.\\
+Dobbiamo quindi fare in modo che l'algoritmo sappia determinare di aver già calcolato un qualsiasi $ fib(x) $. Per fare questo sono necessarie delle tabelle; pagheremo in spazio ma guadagneremo in tempo di esecuzione.\\
+La soluzione migliore in questo caso è istanziare un vettore di $ n $ posti. Controllando la presenza di $ T[x] $ è possibile eliminare completamente la ricorsione:
+\begin{algorithmic}
+	\Function{Fibo}{n, T}
+		\State $ T[0] = T[1] = 1 $
+		\For{$ i \gets 2 \to n $}
+			\State $ T[i] = T[i-1] + T[i-2] $
+		\EndFor
+		\Return $ T[n] $
+	\EndFunction
+\end{algorithmic}
+
+\paragraph{Problema}
+Abbiamo un vettore di $n$ locazioni che contiene degli interi positivi o negativi. Cerchiamo, dentro questo vettore, di individuare un sottovettore con valore massimo, definito definito come la somma massima di elementi del vettore stesso. \\
+Si tratta di un problema di ottimizzazione: in questo caso, prima di cercare la soluzione, bisogna cercare di scoprire qual è il valore ottimo, per poi trovare l'oggetto che lo concretizzi. Inoltre, prima di trovare un algoritmo ottimo, se ne prova uno semplice per analizzare quanto è possibile accada tramite una ricerca esaustiva. In questo caso la ricerca esaustiva ci porta a cercare tutti i sottovettori: si tratta di $O(n^2)$ sottovettori. \\
+Perché? Perché un sottovettore è individuato dal punto in cui inizia fino al punto in cui finisce: sostanzialmente è una coppia di indici \textit{inizio} e \textit{fine}. Quante coppie posso creare? $\frac{n\times(n-1)}{2}$ (diviso due, perché non considero le coppie uguali $(2,5)$ e $(5,2)$). In questo calcolo escludo i sottovettori da un solo elemento, per cui: $\frac{n\times(n-1)}{2} + n \Rightarrow O(n^2)$. Elaboriamo uno pseudocodice di base:
+\begin{algorithm}
+	\label{alg:subV1}
+	\begin{algorithmic}
+		\Function{subvectorV1}{V}
+			\State $max \gets \phi$
+			\For { $i \gets 1$ to $n-1$ }
+				\For { $f \gets 1$ to $n$ }
+					\State $a \gets$ sommatoria da $i$ a $f$ nel vettore $V$
+					\If { $a > max$ }
+						\State $max \gets a$
+					\EndIf
+				\EndFor
+			\EndFor
+			\State \Return max
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Data l'eccessiva complessità, elaboriamone una nuova versione:
+\begin{algorithm}
+	\label{alg:subV2}
+	\begin{algorithmic}
+		\Function{subvectorV2}{V}
+			\State $max \gets \phi$
+			\For { $i \gets 1$ to $n-1$ }
+				\State $a \gets \phi$
+				\For { $f \gets 1$ to $n$ }
+					\State $a \gets a + V[f]$
+					\If { $a > max$ }
+						\State $max \gets a$
+					\EndIf
+				\EndFor
+			\EndFor
+			\State \Return max
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Questa seconda versione avrà, invece, come complessità, $O(n^2)$. \\
+Se esistono algoritmi che permettono di fare questa operazione in un tempo minore, significa che esiste un procedimento tale da permettere di scartare l'analisi di un numero variabile di sottovettori. \\
+Quando si ha un vettore, si ha una struttura lineare, che è possibile spezzettare. Il primo approccio da utilizzare è il \textit{divide et impera}: perché il \textit{divide et impera} risulti efficiente, dobbiamo dividere il problema in maniera bilanciata, cercando di evitare l'\textit{overlapping} di sottoproblemi. Divididendo il vettore a metà, abbiamo due problemi distinti, per cui sembra non presentarsi \textit{overlapping}. Per trovare una soluzione attraverso il calcolo di una soluzione dei due sottoproblemi, sembra essere richiesto: $T(n) = 2\times T(\frac{n}{2})$. \\
+\newpage
+
+Un esempio di procedura risolutiva:
+\begin{algorithm}
+	\label{alg:subDIV1}
+	\begin{algorithmic}
+		\Function{subvectorV3}{i,j}
+			\If { $i = j$ }
+				\State \Return $V[i]$
+			\EndIf
+			\State $k \gets \lfloor\frac{i+j}{2}\rfloor$
+			\State $a \gets subvector(i,k)$
+			\State $b \gets subvector(k+1,j)$
+			\State \Return $max\{a,b\}$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+In questo caso, però, la ricomposizione del problema gioca un ruolo cruciale ed è totalmente assente: mentre \textit{a} e \textit{b} rapprentano il valore massimo dei sottovettori sinistro e destro, non abbiamo un valore che rappresenti il valore massimo del sottovettore che si trova \textit{a cavallo} tra il punto di incrontro dei due sottovettori \textit{a} e \textit{b}. Potendo scegliere come punto di partenza per quel sottovettore un qualsiasi elemento del sottovettore \textit{a} (e quindi $\frac{n}{2}$) e come funto di fine un qualsiasi elemento del sottovettore \textit{b} (e quindi $\frac{n}{2}$), allora: $\frac{n}{2} \times \frac{n}{2} = \frac{n^2}{4} \Rightarrow T(n) = 2\times T(\frac{n}{2}) + O(n^2)$. \\
+Quindi occorre trovare una soluzione al sottoproblema di trovare un sottovettore del valore massimo che sia a cavallo tra i sottovettori \textit{a} e \textit{b}, senza dover necessariamente pagare - come già visto - $O(n^2)$. \\
+Con due cicli \textit{for} potremmo iterare, a partire dal centro verso gli estremi, per ciascuno dei due sottovettori \textit{a} e \textit{b}, calcolandoci il valore maggiore con $V[\frac{n}{2}]$, poi con $V[\frac{n}{2}-1]$, fino al primo elemento, e poi analogamente anche con il sottovettore \textit{b}, arrivando ad una complessità massima di $O(n)$.
+A questo punto:
+\begin{algorithm}
+	\label{alg:subDIV2}
+	\begin{algorithmic}
+		\Function{subvectorV3}{V,n}
+			\State $max \gets \phi$
+			\For { $i \gets 1$ to $n$ }
+				\State calcola $T[i]$
+				\If { $T[i] > max$ }
+					\State $max \gets T[i]$
+				\EndIf
+			\EndFor
+			\State \Return max
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Calcolare $T[i]$ significa:
+\begin{itemize}
+	\item se $i=1 \Rightarrow V[i]$
+	\item altrimenti $max\{T[i-1]+V[i], V[i]\}$
+\end{itemize}
+Il che significa riuscire a calcolare $T[i]$ in $O(1)$. \\
+L'idea fondamentale è la definizione di una famiglia di problemi minimi tra loro, risolvibili efficientemente e tali per cui il mio problema originale faccia parte di quei problemi o sia risolvibile efficientemente da essi.
+La programmazione dinamica quindi si prepone come obiettivo la risoluzione efficace di problemi: per farlo si prepara la risoluzione in due fasi, trovare il valore ricercato nel problema e trovare una soluzione generale al problema. Molto spesso si fa uso della costruzione di una tabella $T$ (tendenzialmente un vettore monodimensionale) di lunghezza $n$, dove $n$ sono i sottoproblemi: quindi per ogni valore $i$ di $T$, a $T[i]$ sarà associato il valore del ottovettore che vale di pià e termina con $V[i]$, il quale non è altro che il vettore che viene analizzato nella risoluzione del problema. \\
+Tornando al problema precedente, occorre trovare la soluzione dato un valore: se per trovare quel valore è costato $O(n)$, per ricostruire si impiegherà al massimo $O(n)$. Per costruire la tabella in questo caso si è usato una procedura ricorsiva, in base alle caselle precedenti a ciascuna. Per trovare una soluzione, occorre muoversi inversamente rispetto alla procedura usata nella prima fase. La regola ricorsiva associava ad ogni valore $T[i] = max\{V[i], T[i-1]+V[i]\}$. Occorre trovare la soluzione con il valore dell'estremo destro del sottovettore $j$ e il valore della soluzione $max$. Se $i=j$, allora il vettore è composto da un solo elemento, che deve essere necessariamente $=max$. Altrimenti, se è $<$, scorro verso sinistra partendo da $T[i]$, controllando che ogni somma degli elementi destri già analizzati con quelli presi in quel momento sotto esame, sia $=max$:
+\begin{algorithm}
+	\label{alg:subDIVpt2}
+	\begin{algorithmic}
+		\Function{subvectorPT2}{J,max}
+			\State $i \gets J$
+			\While { $max - V[i] \neq \phi$ }
+				\State $max \gets max - V[i]$
+				\State $i \gets i-1$
+			\EndWhile
+			\State \Return i
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Questo rappresenta il caso più semplice: sviluppando l'algoritmo per comprendere casi più complessi, $T$ viene popolato come la tabella contenente come elemento la lunghezza massima della sottosequenza che termina con $V[i]$. Quindi, partendo dall'elemento $J$ dato in input, sapremo che dovremo trovare gli elementi di una sottosequenza che ha lunghezza $T[J]$: questi sicuramente saranno alla sinistra dell'elemento $T[J]$, ma altrettanto sicuramente, non saranno direttamente adiacenti alla sua sinistra. Quindi, $T[i] =$
+\begin{enumerate}
+	\item se $V[i]=1$ è minimo in $\{V[1], V[i]\}$, 1;
+	\item altrimenti, $max\{T[j]\}+1$, per $1\leq j < i$.
+\end{enumerate}
+Quindi:
+\begin{algorithm}
+	\label{alg:subDIVpt2-2}
+	\begin{algorithmic}
+		\Function{subvectorPT2-2}{J,max}
+			\State $Sol \gets J$
+			\While { $lmax > 1$ }
+				\State $t \gets J$
+				\While { $T[t] \neq max$ or $V[t] > V[J]$ }
+					\State $t \gets t-1$
+				\EndWhile
+				\State metto $t$ in testa a $Sol$
+				\State $J \gets t$
+				\State $lmax \gets lmax-1$
+			\EndWhile
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+Asintoticamente tutto questo quanto costa? La costruzione della tabella costerà $O(n^2)$. Orientativamente, anche la seconda parte non raggiungerà mai $O(n^2)$.
+
+\paragraph{Albero dei cammini massimi}
+Sappiamo che per Dikjstra, per costruire l'albero dei cammini minimi partendo da un nodo, scegliamo l'arco la cui somma con i costi degli archi che lo legano al nodo di partenza attraverso gli archi già scelti è la minore possibile. \\
+Supponiamo di fare lo stesso per costruire il cammino massimo. Il problema non è però ben definito: supponiamo di avere un ciclo con un certo peso, possiamo costruire un arco lungo tante volte quanti giri multipli faccio su tutto il ciclo, per ottenerne uno ancora più grande. Parliamo - per risolvere il problema - allora di cammini semplici da un nodo all'altro, quindi senza attraversare più di una volta lo stesso nodo. \\
+Dijkstra puro non funziona però nel caso dei cammini massimi, se non applicando alcune modifiche all'algoritmo. \\
+Inoltre, non si conosce un algoritmo non asintotica minore di polinomiale che risolva questo problema di massimizzazione. \\
+Si usa, per cercare di risolvere il problema, utilizzare dei vincoli che semplifichino il problema: per esempio, quello più comune, è considerare il grafo come un alber (semplificazione molto forte). In questo caso, potremmo utilizzare un vincolo non così forte: supponiamo che il grafo sia un \textit{DAG} (un grafo diretto aciclico). Dato un \textit{DAG} la ricerca dell'arco più lungo è risolvibile in $O(n+m)$. Si sfrutta il fatto che si può non parlare di cammini semplici, perché il \textit{DAG} è aciclico. \\
+Quindi, dato un nodo $x$, voglio sapere tutti i cammini più lunghi che legano $x$ a ogni altro nodo.
+La prima cosa che faccio è un \textit{sort topologico}: il \textit{DAG} - siccome è aciclico - sicuramente permette di fare il sort topologico. Questo ci permette di sistemare i nodi in modo tale che il primo nodo avrà solo archi da sinistra verso destra. Supponiamo di rinominare ogni nodo partendo da 1 dal nodo all'estrema sinistra, proseguendo in maniera crescente verso destra. Quindi, nella tabella $T$, in $T[i]$ inserirò il valore distanza da $x$ a $i$. In $T[x]$ inseriremo subito $\phi$, e a quelli alla sua sinistra -INFINITO. \\
+Per un nodo, per sapere la sua distanza massima da $x$, occorre vedere se ci sono archi che entrano in questo nodo - e in un sort topologico entrano solo da sinistra. Ogni arco arriva da uno per il quale è già stata calcolata distanza massima. Sostanzialmente, basterà scegliere il massimo tra gli archi entranti. Per ottenere i nodi da cui partono questi archi entranti, non si può usare $adj()$, perché ci porterebbe ai nodi raggiungibili dal nodo preso in considerazione da archi uscenti. Per questo si userà per questo la notazione $adj^-()$ (analogamente $adj^+()$ sarà usato per trovare i nodi raggiunibili tramite archi uscenti, come il $adj()$ puro). Quanto costa utilizzare questo $adj^-$, quindi la costruzione di liste di \textit{incidenza}, a partire da liste di adiacenza? Esattamente $O(n+m)$. \\
+A questo punto bisognerà soltanto selezionare l'arco entrante più distante da $x$, e quindi la distanza sarà $T[j] = max{T[t]} + 1$, dove $t \in adj^-(j)$. Esiste però il caso in cui non vi sono archi incidenti, nonostante ci si trovi alla destra di altri nodi, caso in cui $adj^-() = \phi$: la sua distanza va settata a -INFINITO. Quindi, più correttamente, $T[j] =$
+\begin{enumerate}
+	\item se $adj^-(j) = \phi$: -INFINITO;
+	\item altrimenti: $max\{T[t]\} + 1$, dove $t \in adj^-(j)$.
+\end{enumerate}
+Quanto costerà questa procedura? Costruire il sort topologico $O(n+m)$, costruire le liste di incidenza $O(n+m)$, scegliere il massimo tra gli incidenti $O(n)$; quindi: $O(n+m) + O(n+m) + O(n) \Rightarrow O(n+m)$.
+
+\section{Pianificazione delle attività}
+Ho $n$ attività, chiamate con lettere alfabetiche, e dei vincoli. Per fare un'attività $a$, serve $x$; $x$ è propedeutico per $a$, fatto rappresentabile con: $a \to x$ o $(a$ $x)$. Possiamo pensare di poter rappresentare la propedeuticità attraverso un grafo diretto, costruendo un sort topologico, che stabilisca un ordine tra le propedeuticità. Se non ci fosse un sort topologico, significherebbe avere un ciclo, il che è impossibile perché porterebbe ad un \textit{loop} di propedeuticità. \\
+Supponiamo che oltre ai vincoli, ogni attività abbia un costo in tempo. Qual è il tempo minimo per completare tutte le attività? Sicuramente il tempo massimo è la somma di ciascun tempo di esecuzione. Se invece non esistessero vincoli, potrei cominciare tutte le attività in parallelo, per cui il tempo massimo è dato dal massimo tra i tempi di esecuzione delle attività. \\
+Supponendo di avere un nodo di partenza il cui tempo è esattamente 0, vincolo di ogni altra attività, e un nodo finale, raggiunto alla fine da ogni altra attività, allora presumibilmente il costo minimo sarà la distanza tra i due nodi iniziale e finale. \\
+Con la programmazione dinamica si può calcolare - esattamente come è stato fatto nell'esercizio precedente - la distanza massima, anche detta \textit{cammino critico}, che altro non è che il tempo minimo per completare l'insieme delle attività. \\ \\
+
+Aggiungiamo informazioni: ho delle attività che non solo hanno dei vincoli ed un costo a livello di tempo di esecuzione, ma anche dei tempi scanditi per l'inizio dell'esecuzione stessa. Questi vincoli sono detti \textit{vincoli di differenza}, denotati dalla lettera $x$, definiti come: $x_1 - x_2 \leq t_1$, dove 1 e 2 sono due attività vincolate e dove $t$ è il tempo di esecuzione: per esempio, essendo $a$ e $b$ due attività, in cui la prima è propedeutica per la seconda, $x_a - x_b \leq 5$ significa che l'attività $b$ deve essere schedulata almeno 5 unità di tempo dopo che $a$ sia stato eseguito. Se tutte le costanti definite dai vincoli di differenza sono positive allora il \textit{progetto} (definito come l'insieme delle attività) è fattibile.
