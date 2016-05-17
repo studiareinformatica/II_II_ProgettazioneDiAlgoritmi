@@ -227,3 +227,85 @@ In un museo c'è un lungo corridoio rettilineo in cui sono esposti $n$ quadri ne
 		\EndFunction
 	\end{algorithmic}
 \end{algorithm} \\ \hfill
+
+\paragraph{Es1 SIMULAZIONE}
+Abbiamo una matrica $n\times n$: verificare se si può raggiungere la cella in basso a destra partendo dalla cella in alto a sinistra, senza toccare le celle che contengono $1$ e muovendosi solo in basso o a destra. \\
+Soluzione parziale:
+\begin{algorithm}
+	\caption{Es1}\label{alg:es1-sim}
+	\begin{algorithmic}[1]
+		\Function{es1}{$i,j$}
+			\If { $M[i,j] = 1$ }
+				\State \Return false
+			\EndIf
+			\If { $i = 1$ and $j = 1$ }
+				\State \Return true
+			\EndIf
+			\If { $i = 1$ }
+				\State \Return $es1(i,j-1)$
+			\EndIf
+			\If { $j = 1$ }
+				\State \Return $es1(i-1,j)$
+			\EndIf
+			\State \Return $es1(i-1,j)$ or $es1(i,j-1)$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \\ \hfill
+Adesso basta invocare questa procedura per $n,n$, per trovare la rispota al problema. \\
+Questo algoritmo è poco efficiente, infatti ricalcolo più volte gli stessi sottoproblemi (simile al calcolo di \textit{Fibonacci} per ricorsione). \\
+Infatti se stendiamo l'albero di ricorsione abbiamo un albero binario di altezza $2n$, raggiungendo una complessità di $O(4^n)$. \\
+Possiamo migliorare la complessità tramite la tecnica della programmazione dinamica. Aggiungiamo una tabella in cui salviamo i risultati dei sottoproblemi, e una condizione che, invece di ricalcolare il sottoproblema, prima controlla nella tabella se già è stato risolto:
+\begin{algorithm}
+	\caption{Es1}\label{alg:es1-sim-2}
+	\begin{algorithmic}[1]
+		\Function{es1}{$i,j$}
+			\If { $T[i,j] \neq -1$ }
+				\State \Return $T[i,j]$
+			\EndIf
+			\If { $M[i,j] = 1$ }
+				\State $T[i,j]$ = false
+				\State \Return false
+			\EndIf
+			\If { $i = 1$ and $j = 1$ }
+				\State $T[i,j]$ = true
+				\State \Return true
+			\EndIf
+			\If { $i = 1$ }
+				\State \Return $es1(i,j-1)$
+			\EndIf
+			\If { $j = 1$ }
+				\State \Return $es1(i-1,j)$
+			\EndIf
+			\State \Return $es1(i-1,j)$ or $es1(i,j-1)$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \\ \hfill
+Questa seconda versione è più efficiente, ma rimane il problema che per calcolare la nostra risposta le calcoliamo tutte. \\
+Se invece di usare la ricorsione calcoliamo noi il percorso partendo direttamente dalla cella $n,n$ possiamo migliorare ulteriormente la complessità.
+\begin{algorithm}
+	\caption{Es1}\label{alg:es1-sim-3}
+	\begin{algorithmic}[1]
+		\Function{es1}{$i,j$}
+			\For { $i\gets 1$ to $n$ }
+				\For { $j\gets 1$ to $n$ } 
+					\If { $M[i,j] = 1$ }
+						\State $T[i,j]$ = false
+					\ElsIf { $i = 1$ and $j = 1$ }
+						\State $T[i,j]$ = true
+					\State \Return true
+					\ElsIf { $i = 1$ }
+						\State $T[i,j] = T[i,j-1]$
+					\ElsIf { $j = 1$ }
+						\State $T[i,j] = T[i-1,j]$
+					\Else
+						\State $T[i,j] = T[i-1,j]$ or $T[i,j-1]$
+					\EndIf
+				\EndFor
+			\EndFor
+			\State \Return $T[n,n]$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \\ \hfill
+
+Questa procedura ha complessità $n^2$. \\
+Una volta calcolata la tabella, se vogliamo trovare il cammino, basta risalire la tabella al contrario. \\

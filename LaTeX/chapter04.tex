@@ -204,3 +204,34 @@ Per risolverlo accorre in aiuto l'algoritmo di \textit{Bellman-Ford}, che costa 
 Costruiamo una tabella $T$ che raccoglie sia in verticale che in orizzontale interi da $1$ a $n$ (le attività, ormai nodi). Quindi: $T[i,j] = $ costo minimo per andare dalla sorgente al nodo $j$ attraversando al più $i$ archi. Un cammino minimo potrà attraversare soltanto nodi distinti, perché altrimenti sarebbe un ciclo, il che lo porterebbe ad una distanza maggiore sempre (dato che abbiamo escluso la possibilità che ci siano cicli con peso negativo). Nella prima riga della colonna avremo soltanto valori di archi che collegano il nodo sorgente al nodo $j$ stesso, presupponendo che esista un arco (altrimenti +INFINITO). Per ogni valore della tabella, questo dipende sempre dai valori della riga precedente: l'idea di \textit{Bellman-Ford} è che per arrivare ad un nodo $j$ sono necessari al massimo $i-1$ archi perchè rappresenti il cammino minimo, ovvero per calcolare il valore del cammino minimo dal nodo sorgente a $j$ è necessario considerare soltanto le caselle delle righe superiori a $j$ nella tabella. Quindi: $T[i,j] = min\{T[i-1,j],min\{T[i-1,k]\},c(k,j)\}$, dove $k$ è ciascun arco incidente a $j$. \\
 L'unica cosa che resta da vedere è la complessità dell'algoritmo: occorre verificare che sia $O(n\times m)$. Quante celle devo calcolare, nella tabella? $n^2$. Sicuramente almeno $O(n^2)$. Considerato poi che per ogni nodo analizziamo gli adiacenti, che possono essere massimo $n-1$, allora: $O(n^2)\times O(n) = O(n^3)$. E' vero anche che $O(n\times m)$, perché nel caso peggiore $m=n^2$. \\
 Tornando al riempimento della tabella, pagherò $O(n)$ per analizzare ogni riga, da moltiplicare al costo per riempire ogni cella, che equivale esattamente al numero di archi entranti per ciascuna cella, quindi pari alla sommatoria per $i$ che va da $1$ a $n$ di $O(m_i)$: altro non è che $m$ stesso. Mentre il ragionamento precedente era rozzo, questo garantisce che effettivamente la complessità è effettivamente $O(n\times m)$.
+
+\paragraph{Esercizio}
+Il prossimo esercizio vuole trovare la distanza di ogni nodo del grafo con qualsiasi altro nodo, sapendo che il grafo contiene archi con peso negativo. \\
+Partendo dalla complessità risolutiva dell'esercizio precedente, possiamo dire facilmente che la complessità sia $O(n\times m)\times n = O(n^2 \times m) \Rightarrow \theta(n^3)$. \\
+Vogliamo trovare il \textit{lower bound}. Possiamo definire, per gli $n$ nodi, una tabella a tre indici: $T[k,i,j]$, dove ciacuna variabile va da 1 a $n$. Si tratterà di una sorta di cubo, in cui quando $k$ raggiunge $n$, significherà che una delle facce conterrà esattamente la tabella delle distanze minime. Sostanzialmente, è un cubo che ci fornisce il costo minimo per andare da $i$ a $j$ senza mai attraversare i nodi di indice $> k$. Quindi, più $k$ è piccolo più il vincolo è forte: se $k$ è 0, significa voler andare da $i$ a $j$ senza attraversare nessun nodo, potendosi quindi raggiungere i due nodi direttamente. \\
+Quindi $T[k,i,j]=$
+\begin{itemize}
+	\item $c[i,j]$ (ovvero il costo dell'arco che va da $i$ a $j$), se $k=0$;
+	\item $min\{T[k-1,i,j],min\{T[k-1,i,k],T[k-1,k,j]\}\}$ (dove il primo elemento è il minor cammino possibile senza toccare mai il nodo $k$, il secondo invece passandoci una sola volta: la somma del costo minimo per arrivare da $i$ a $k$ e di quello per arrivare da $k$ a $j$), altrimenti.
+\end{itemize}
+\newpage
+Sintetizzato in codice:
+\begin{algorithm}
+	\label{alg:cub}
+	\begin{algorithmic}
+		\Function{algo}{}
+			\For { $k\gets 0$ to $n$ }
+				\For { $i\gets 1$ to $n$ }
+					\For { $j\gets 1$ to $n$ }
+						\If { $k=0$ }
+							\State $T[k,i,j] = c[i,j]$
+						\Else
+							\State $T[k,i,j] = min\{T[k-1,i,j],min\{T[k-1,i,k],T[k-1,k,j]\}\}$
+						\EndIf
+					\EndFor
+				\EndFor
+			\EndFor
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm} \hfill \\
+L'algoritmo, anche a prima occhiata è possibile capirlo, impiega $\theta(n^3)$. \\
